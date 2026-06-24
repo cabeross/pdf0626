@@ -1,1 +1,597 @@
-Test test
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Mapa czasów realizacji — 2024/25</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root{
+    --bg:#10141b;
+    --panel:#171c25;
+    --panel-2:#1d2330;
+    --border:#272e3c;
+    --text:#eceff3;
+    --muted:#838ea0;
+    --muted-2:#5d6678;
+    --s:#4fd1c5;
+    --m:#f2a65a;
+    --l:#e4607a;
+    --grid:#222837;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 28px 60px;}
+
+  header{margin-bottom:32px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:18px;border-bottom:1px solid var(--border);padding-bottom:22px;}
+  .eyebrow{font-size:11px;letter-spacing:.18em;color:var(--muted-2);text-transform:uppercase;margin-bottom:10px;font-weight:500;}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;margin:0 0 6px;color:var(--text);letter-spacing:-0.01em;}
+  .sub{color:var(--muted);font-size:13px;max-width:480px;line-height:1.5;}
+  .period{text-align:right;font-size:12px;color:var(--muted);}
+  .period strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:18px;color:var(--text);font-weight:600;}
+
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .stat .label{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:8px;}
+  .stat .value{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:600;color:var(--text);}
+  .stat .value span.unit{font-size:13px;color:var(--muted);font-weight:400;margin-left:3px;}
+  .stat .note{font-size:11px;color:var(--muted-2);margin-top:4px;}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
+
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px 24px 12px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:12px;}
+  .panel-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;}
+  .panel-title small{display:block;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:3px;}
+
+  .legend{display:flex;gap:16px;align-items:center;}
+  .legend button{display:flex;align-items:center;gap:7px;background:var(--panel-2);border:1px solid var(--border);border-radius:20px;padding:6px 13px 6px 9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;transition:all .15s ease;}
+  .legend button .sw{width:10px;height:10px;border-radius:50%;}
+  .legend button.active{color:var(--text);border-color:var(--muted-2);}
+  .legend button:hover{color:var(--text);}
+
+  .chart-area{position:relative;height:460px;margin-top:14px;}
+  .size-hint{display:flex;justify-content:flex-end;gap:18px;padding:14px 4px 6px;color:var(--muted-2);font-size:11px;align-items:center;}
+  .size-hint .ex{display:inline-flex;align-items:center;gap:6px;}
+  .size-hint .circle{border-radius:50%;background:var(--muted-2);opacity:.55;display:inline-block;}
+
+  .filterbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px;}
+  .filterbar .flabel{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-right:2px;}
+  .filterbar .field{display:flex;flex-direction:column;gap:3px;}
+  .filterbar .field span{font-size:10px;color:var(--muted-2);letter-spacing:.06em;text-transform:uppercase;}
+  .filterbar input[type="date"]{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;color-scheme:dark;cursor:pointer;}
+  .filterbar input[type="date"]:focus{outline:none;border-color:var(--muted-2);}
+  .filterbar .presets{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+  .filterbar .presets button{background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s ease;}
+  .filterbar .presets button:hover{color:var(--text);border-color:var(--muted-2);}
+  .filterbar .presets button.active{color:var(--text);background:var(--panel);border-color:var(--muted-2);}
+  .filterbar .count{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .percbar{display:flex;gap:24px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:18px;}
+  .percbar .plabel{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);}
+  .percbar .pitem{display:flex;align-items:baseline;gap:8px;}
+  .percbar .pname{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.04em;}
+  .percbar .pval{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text);}
+  .percbar .pval span{font-size:11px;color:var(--muted);font-weight:400;margin-left:3px;font-family:'IBM Plex Mono',monospace;}
+  .percbar .pswatch{width:14px;height:2px;border-radius:1px;display:inline-block;margin-right:2px;}
+  .percbar .phint{font-size:11px;color:var(--muted-2);margin-left:auto;max-width:280px;line-height:1.5;}
+  .section-divider{display:flex;align-items:center;gap:14px;margin:42px 0 22px;}
+  .section-divider .num{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--muted-2);letter-spacing:.08em;}
+  .section-divider .stitle{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text);}
+  .section-divider .ssub{font-size:11.5px;color:var(--muted);margin-left:auto;max-width:380px;text-align:right;line-height:1.5;}
+  .section-divider .rule{flex:0 0 24px;height:1px;background:var(--border);}
+
+  .analysis-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+  @media (max-width:900px){ .analysis-grid{grid-template-columns:1fr;} }
+
+  .dist-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .dist-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:14px;padding:18px 0;border-bottom:1px solid var(--border);}
+  .dist-row:last-child{border-bottom:none;}
+  .dist-label{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .dist-label .dotbig{width:10px;height:10px;border-radius:50%;}
+  .dist-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-align:right;line-height:1.5;}
+  .dist-meta b{color:var(--text);font-weight:500;}
+  .dist-svg-wrap{position:relative;}
+  .dist-svg{display:block;width:100%;height:54px;overflow:visible;}
+  .dist-scale{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted-2);}
+
+  .out-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .out-panel h3{font-family:'Space Grotesk',sans-serif;margin:0 0 4px;font-size:15px;font-weight:600;}
+  .out-panel .sublead{font-size:11px;color:var(--muted-2);margin-bottom:14px;}
+  .out-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .out-item:last-child{border-bottom:none;}
+  .out-item .badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#10141b;}
+  .out-item .out-date{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);}
+  .out-item .out-meta{font-size:10.5px;color:var(--muted-2);margin-top:2px;letter-spacing:.04em;}
+  .out-item .out-val{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-align:right;}
+  .out-item .out-val .unit{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10.5px;color:var(--muted);display:block;margin-top:1px;}
+  .out-empty{color:var(--muted-2);font-size:12px;padding:12px 0;}
+
+  footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
+  footer b{color:var(--muted);}
+
+  @media (max-width:880px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">Operacje — śledzenie zamówień</div>
+      <h1>Mapa czasów realizacji</h1>
+      <div class="sub">Każde kółko to zakończone zamówienie. Pozycja w poziomie i wielkość kółka pokazują czas realizacji w dniach, kolor — deklarowany rozmiar zamówienia.</div>
+    </div>
+    <div class="period">
+      Okres danych
+      <strong>VII 2024 — XII 2025</strong>
+    </div>
+  </header>
+
+  <div class="filterbar">
+    <span class="flabel">Filtr okresu</span>
+    <div class="field">
+      <span>Od</span>
+      <input type="date" id="dateFrom">
+    </div>
+    <div class="field">
+      <span>Do</span>
+      <input type="date" id="dateTo">
+    </div>
+    <div class="presets" id="presets">
+      <button data-preset="all" class="active">Cały okres</button>
+      <button data-preset="2024">2024</button>
+      <button data-preset="2025">2025</button>
+      <button data-preset="last3">Ost. 3 mies.</button>
+      <button data-preset="last6">Ost. 6 mies.</button>
+      <button data-preset="last12">Ost. 12 mies.</button>
+    </div>
+    <span class="count" id="filterCount"></span>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Zamówienia</div>
+      <div class="value" id="statCount">—</div>
+      <div class="note">w analizowanym okresie</div>
+    </div>
+    <div class="stat">
+      <div class="label">Średni czas realizacji</div>
+      <div class="value" id="statAvg">—<span class="unit">dni</span></div>
+      <div class="note">mediana: <span id="statMedian">—</span> dni</div>
+    </div>
+    <div class="stat">
+      <div class="label"><span class="dot" style="background:var(--s)"></span>S — rozmiar mały</div>
+      <div class="value" id="statS">—<span class="unit">dni śr.</span></div>
+      <div class="note" id="statSNote">—</div>
+    </div>
+    <div class="stat">
+      <div class="label"><span class="dot" style="background:var(--m)"></span>M — rozmiar średni</div>
+      <div class="value" id="statM">—<span class="unit">dni śr.</span></div>
+      <div class="note" id="statMNote">—</div>
+    </div>
+    <div class="stat">
+      <div class="label"><span class="dot" style="background:var(--l)"></span>L — rozmiar duży</div>
+      <div class="value" id="statL">—<span class="unit">dni śr.</span></div>
+      <div class="note" id="statLNote">—</div>
+    </div>
+  </div>
+
+  <div class="percbar">
+    <span class="plabel">Percentyle czasu realizacji</span>
+    <div class="pitem"><span class="pswatch" style="background:#5d6678"></span><span class="pname">P50 · mediana</span><span class="pval" id="percP50">—<span>dni</span></span></div>
+    <div class="pitem"><span class="pswatch" style="background:#9aa4b5"></span><span class="pname">P75</span><span class="pval" id="percP75">—<span>dni</span></span></div>
+    <div class="pitem"><span class="pswatch" style="background:#e4b35a"></span><span class="pname">P95</span><span class="pval" id="percP95">—<span>dni</span></span></div>
+    <div class="phint">P95 to wartość, której nie przekracza 95% zamówień — pokazuje „najgorszy realistyczny" czas dostawy.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Czas realizacji × rozmiar zamówienia
+        <small>Oś X — data ukończenia · Oś Y — czas realizacji (dni) · linie przerywane — percentyle P50 / P75 / P95</small>
+      </div>
+      <div class="legend" id="legend">
+        <button data-size="S" class="active"><span class="sw" style="background:var(--s)"></span>S</button>
+        <button data-size="M" class="active"><span class="sw" style="background:var(--m)"></span>M</button>
+        <button data-size="L" class="active"><span class="sw" style="background:var(--l)"></span>L</button>
+      </div>
+    </div>
+    <div class="chart-area">
+      <canvas id="bubbleChart"></canvas>
+    </div>
+  </div>
+
+  <div class="section-divider">
+    <span class="num">02</span>
+    <span class="stitle">Rozkład i przewidywalność</span>
+    <span class="rule"></span>
+    <span class="ssub">Jak zachowują się czasy realizacji w obrębie każdej kategorii rozmiaru oraz które zamówienia wykraczają poza P95.</span>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="dist-panel" id="distPanel">
+      <!-- distribution rows rendered by JS -->
+    </div>
+
+    <div class="out-panel">
+      <h3>Spotlight outlierów</h3>
+      <div class="sublead">Zamówienia przekraczające P95 dla aktualnego okresu</div>
+      <div id="outList"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Źródło:</b> Lead_Times_202425.xlsx · <b>n</b> = 36 zamówień · Kolor kółka oznacza deklarowany rozmiar zamówienia (S / M / L).
+  </footer>
+
+</div>
+
+<script>
+const records = [{"date": "2024-07-15", "size": "S", "leadtime": 49}, {"date": "2024-08-22", "size": "S", "leadtime": 48}, {"date": "2024-09-10", "size": "S", "leadtime": 87}, {"date": "2024-09-25", "size": "M", "leadtime": 57}, {"date": "2024-10-05", "size": "M", "leadtime": 148}, {"date": "2024-10-14", "size": "S", "leadtime": 53}, {"date": "2024-10-28", "size": "S", "leadtime": 45}, {"date": "2024-11-18", "size": "M", "leadtime": 145}, {"date": "2024-12-04", "size": "L", "leadtime": 105}, {"date": "2025-01-08", "size": "S", "leadtime": 5}, {"date": "2025-01-20", "size": "L", "leadtime": 163}, {"date": "2025-02-14", "size": "S", "leadtime": 43}, {"date": "2025-02-26", "size": "M", "leadtime": 415}, {"date": "2025-03-15", "size": "L", "leadtime": 123}, {"date": "2025-04-10", "size": "M", "leadtime": 103}, {"date": "2025-05-05", "size": "L", "leadtime": 104}, {"date": "2025-06-12", "size": "L", "leadtime": 302}, {"date": "2025-06-25", "size": "L", "leadtime": 158}, {"date": "2025-07-02", "size": "L", "leadtime": 98}, {"date": "2025-07-11", "size": "S", "leadtime": 52}, {"date": "2025-07-18", "size": "M", "leadtime": 95}, {"date": "2025-07-29", "size": "S", "leadtime": 70}, {"date": "2025-08-03", "size": "M", "leadtime": 95}, {"date": "2025-08-14", "size": "M", "leadtime": 101}, {"date": "2025-08-21", "size": "M", "leadtime": 57}, {"date": "2025-08-29", "size": "M", "leadtime": 57}, {"date": "2025-09-08", "size": "S", "leadtime": 53}, {"date": "2025-09-22", "size": "L", "leadtime": 137}, {"date": "2025-10-04", "size": "S", "leadtime": 73}, {"date": "2025-10-12", "size": "M", "leadtime": 60}, {"date": "2025-10-19", "size": "S", "leadtime": 126}, {"date": "2025-10-27", "size": "M", "leadtime": 57}, {"date": "2025-11-05", "size": "L", "leadtime": 124}, {"date": "2025-11-15", "size": "M", "leadtime": 75}, {"date": "2025-11-25", "size": "M", "leadtime": 89}, {"date": "2025-12-10", "size": "S", "leadtime": 44}];
+
+const COLORS = { S:'#4fd1c5', M:'#f2a65a', L:'#e4607a' };
+const SIZE_LABEL = { S:'Mały', M:'Średni', L:'Duży' };
+
+// Uniform bubble radius — only color encodes size category.
+const POINT_R = 8;
+function radiusFor(){ return POINT_R; }
+
+function median(arr){
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b)=>a-b);
+  const mid = Math.floor(s.length/2);
+  return s.length % 2 ? s[mid] : (s[mid-1]+s[mid])/2;
+}
+
+// Linear-interpolation percentile (matches Excel PERCENTILE.INC)
+function percentile(arr, p){
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b)=>a-b);
+  const rank = (p/100) * (s.length - 1);
+  const lo = Math.floor(rank), hi = Math.ceil(rank);
+  if (lo === hi) return s[lo];
+  return s[lo] + (s[hi] - s[lo]) * (rank - lo);
+}
+
+// Date range from data
+const allDates = records.map(r => new Date(r.date));
+const dataMin = new Date(Math.min(...allDates));
+const dataMax = new Date(Math.max(...allDates));
+const toISO = d => d.toISOString().slice(0,10);
+
+const fromInput = document.getElementById('dateFrom');
+const toInput = document.getElementById('dateTo');
+fromInput.min = toInput.min = toISO(dataMin);
+fromInput.max = toInput.max = toISO(dataMax);
+fromInput.value = toISO(dataMin);
+toInput.value = toISO(dataMax);
+
+// State
+const hiddenSizes = new Set();
+let currentPercentiles = { p50: 0, p75: 0, p95: 0 };
+
+function filteredRecords(){
+  const from = new Date(fromInput.value + 'T00:00:00').getTime();
+  const to = new Date(toInput.value + 'T23:59:59').getTime();
+  return records.filter(r => {
+    const t = new Date(r.date).getTime();
+    return t >= from && t <= to;
+  });
+}
+
+function buildDataset(sz, source){
+  return {
+    label: sz,
+    data: source.filter(r=>r.size===sz).map(r=>({
+      x: new Date(r.date).getTime(),
+      y: r.leadtime,
+      r: radiusFor(),
+      _raw: r
+    })),
+    backgroundColor: COLORS[sz] + 'b3',
+    borderColor: COLORS[sz],
+    borderWidth: 1.5,
+    hoverBackgroundColor: COLORS[sz] + 'e6',
+    hoverBorderColor: '#fff',
+    hidden: hiddenSizes.has(sz),
+  };
+}
+
+function updateStats(source){
+  document.getElementById('statCount').textContent = source.length;
+  if (!source.length){
+    document.getElementById('statAvg').innerHTML = '—<span class="unit">dni</span>';
+    document.getElementById('statMedian').textContent = '—';
+  } else {
+    const lts = source.map(r=>r.leadtime);
+    const avg = lts.reduce((a,b)=>a+b,0)/lts.length;
+    const med = median(lts);
+    document.getElementById('statAvg').innerHTML = avg.toFixed(0) + '<span class="unit">dni</span>';
+    document.getElementById('statMedian').textContent = med.toFixed(0);
+  }
+  ['S','M','L'].forEach(sz=>{
+    const vals = source.filter(r=>r.size===sz).map(r=>r.leadtime);
+    if (!vals.length){
+      document.getElementById('stat'+sz).innerHTML = '—<span class="unit">dni śr.</span>';
+      document.getElementById('stat'+sz+'Note').textContent = 'brak zamówień w okresie';
+      return;
+    }
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    document.getElementById('stat'+sz).innerHTML = avg.toFixed(0) + '<span class="unit">dni śr.</span>';
+    document.getElementById('stat'+sz+'Note').textContent = vals.length + ' zam. · zakres ' + Math.min(...vals) + '–' + Math.max(...vals);
+  });
+  document.getElementById('filterCount').textContent = source.length + ' z ' + records.length + ' zamówień';
+}
+
+const PERCENTILE_LINES = [
+  { key: 'p50', label: 'P50 (mediana)', color: '#5d6678', dash: [5,5],  weight: 1.2 },
+  { key: 'p75', label: 'P75',           color: '#9aa4b5', dash: [6,4],  weight: 1.3 },
+  { key: 'p95', label: 'P95',           color: '#e4b35a', dash: [2,3],  weight: 1.5 },
+];
+
+const percentilesPlugin = {
+  id: 'percentiles',
+  afterDraw(chart){
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.font = '11px IBM Plex Mono';
+
+    PERCENTILE_LINES.forEach(line => {
+      const v = currentPercentiles[line.key];
+      if (!v) return;
+      const yPix = yScale.getPixelForValue(v);
+      if (yPix < yScale.top || yPix > yScale.bottom) return;
+
+      // Line
+      ctx.beginPath();
+      ctx.setLineDash(line.dash);
+      ctx.strokeStyle = line.color;
+      ctx.lineWidth = line.weight;
+      ctx.moveTo(xScale.left, yPix);
+      ctx.lineTo(xScale.right, yPix);
+      ctx.stroke();
+
+      // Label pill on the right
+      ctx.setLineDash([]);
+      const text = line.label + ' · ' + v.toFixed(0) + ' dni';
+      const padX = 6, padY = 3;
+      const w = ctx.measureText(text).width + padX*2;
+      const h = 16;
+      const x = xScale.right - w - 2;
+      const y = yPix - h/2;
+      ctx.fillStyle = '#1d2330';
+      ctx.strokeStyle = line.color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(x, y, w, h);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = line.color;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, x + padX, y + h/2 + 0.5);
+    });
+
+    ctx.restore();
+  }
+};
+
+const ctx = document.getElementById('bubbleChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'bubble',
+  data: { datasets: ['S','M','L'].map(sz => buildDataset(sz, records)) },
+  plugins: [percentilesPlugin],
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { top: 6, right: 10 } },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month', tooltipFormat: 'dd.MM.yyyy', displayFormats: { month: 'MM.yyyy' } },
+        title: { display: true, text: 'Data ukończenia', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:12} },
+        grid: { color: '#222837' },
+        ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:11} }
+      },
+      y: {
+        title: { display: true, text: 'Czas realizacji (dni)', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:12} },
+        min: 0,
+        grid: { color: '#222837' },
+        ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:11} }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1d2330',
+        borderColor: '#272e3c',
+        borderWidth: 1,
+        titleColor: '#eceff3',
+        bodyColor: '#bcc3cf',
+        titleFont: { family: "'Space Grotesk'", weight: '600' },
+        bodyFont: { family: "'IBM Plex Mono'", size: 12 },
+        padding: 10,
+        callbacks: {
+          title(items){
+            const r = items[0].raw._raw;
+            return 'Rozmiar ' + r.size + ' — ' + SIZE_LABEL[r.size];
+          },
+          label(item){
+            const r = item.raw._raw;
+            const d = new Date(r.date);
+            return [
+              'Czas realizacji: ' + r.leadtime + ' dni',
+              'Data ukończenia: ' + d.toLocaleDateString('pl-PL')
+            ];
+          }
+        }
+      }
+    }
+  }
+});
+
+function renderDistribution(source){
+  const panel = document.getElementById('distPanel');
+  const allLT = source.map(r=>r.leadtime);
+  const scaleMax = allLT.length ? Math.max(...allLT) : 100;
+  const niceMax = Math.ceil(scaleMax / 50) * 50 || 50;
+
+  const sizes = ['S','M','L'];
+  panel.innerHTML = sizes.map(sz => {
+    const vals = source.filter(r=>r.size===sz).map(r=>r.leadtime);
+    if (!vals.length){
+      return `<div class="dist-row">
+        <div class="dist-label"><span class="dotbig" style="background:${COLORS[sz]}"></span>${sz}</div>
+        <div style="color:var(--muted-2);font-size:11.5px;font-family:'IBM Plex Mono',monospace;">brak zamówień w okresie</div>
+        <div></div>
+      </div>`;
+    }
+    const sorted = [...vals].sort((a,b)=>a-b);
+    const min = sorted[0], max = sorted[sorted.length-1];
+    const p25 = percentile(vals,25), p50 = percentile(vals,50), p75 = percentile(vals,75);
+    const mean = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const variance = vals.reduce((s,v)=>s+(v-mean)*(v-mean),0)/vals.length;
+    const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
+    const consistencyLabel = cv < 0.35 ? 'wysoka' : cv < 0.7 ? 'średnia' : 'niska';
+
+    const H = 54, yMid = 26;
+    const xFor = v => (v / niceMax) * 100;
+    const dots = vals.map(v =>
+      `<circle cx="${xFor(v).toFixed(2)}%" cy="${yMid}" r="3.2" fill="${COLORS[sz]}" fill-opacity="0.45" stroke="${COLORS[sz]}" stroke-width="1"/>`
+    ).join('');
+
+    return `<div class="dist-row">
+      <div class="dist-label"><span class="dotbig" style="background:${COLORS[sz]}"></span>${sz}</div>
+      <div class="dist-svg-wrap">
+        <svg class="dist-svg" viewBox="0 0 100 ${H}" preserveAspectRatio="none">
+          <line x1="${xFor(min)}" y1="${yMid}" x2="${xFor(max)}" y2="${yMid}" stroke="${COLORS[sz]}" stroke-opacity="0.35" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          <line x1="${xFor(min)}" y1="${yMid-7}" x2="${xFor(min)}" y2="${yMid+7}" stroke="${COLORS[sz]}" stroke-opacity="0.55" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          <line x1="${xFor(max)}" y1="${yMid-7}" x2="${xFor(max)}" y2="${yMid+7}" stroke="${COLORS[sz]}" stroke-opacity="0.55" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          <rect x="${xFor(p25)}" y="${yMid-10}" width="${xFor(p75)-xFor(p25)}" height="20" fill="${COLORS[sz]}" fill-opacity="0.18" stroke="${COLORS[sz]}" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          <line x1="${xFor(p50)}" y1="${yMid-10}" x2="${xFor(p50)}" y2="${yMid+10}" stroke="${COLORS[sz]}" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          ${dots}
+        </svg>
+        <div class="dist-scale" style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span>0</span><span>${Math.round(niceMax/2)}</span><span>${niceMax} dni</span>
+        </div>
+      </div>
+      <div class="dist-meta">
+        <b>${vals.length}</b> zam. · zakres <b>${min}–${max}</b><br>
+        IQR <b>${p25.toFixed(0)}–${p75.toFixed(0)}</b> · mediana <b>${p50.toFixed(0)}</b><br>
+        przewidywalność: <b>${consistencyLabel}</b> <span style="opacity:.6">(CV ${(cv*100).toFixed(0)}%)</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderOutliers(source){
+  const list = document.getElementById('outList');
+  const lts = source.map(r=>r.leadtime);
+  if (!lts.length){
+    list.innerHTML = '<div class="out-empty">Brak zamówień w wybranym okresie.</div>';
+    return;
+  }
+  const p95 = percentile(lts, 95);
+  const p50 = percentile(lts, 50) || 1;
+  const outliers = source
+    .filter(r => r.leadtime > p95)
+    .sort((a,b) => b.leadtime - a.leadtime);
+
+  if (!outliers.length){
+    list.innerHTML = '<div class="out-empty">Żadne zamówienie nie przekracza P95 w tym okresie.</div>';
+    return;
+  }
+
+  list.innerHTML = outliers.map(r => {
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString('pl-PL', {day:'2-digit', month:'long', year:'numeric'});
+    const multiplier = (r.leadtime / p50).toFixed(1);
+    return `<div class="out-item">
+      <div class="badge" style="background:${COLORS[r.size]}">${r.size}</div>
+      <div>
+        <div class="out-date">${dateStr}</div>
+        <div class="out-meta">${multiplier}× mediana okresu · rozmiar ${SIZE_LABEL[r.size]}</div>
+      </div>
+      <div class="out-val">${r.leadtime}<span class="unit">dni</span></div>
+    </div>`;
+  }).join('');
+}
+
+function applyFilter(){
+  // Guard: from must be <= to
+  if (fromInput.value > toInput.value){
+    toInput.value = fromInput.value;
+  }
+  const source = filteredRecords();
+  const lts = source.map(r=>r.leadtime);
+  currentPercentiles = {
+    p50: percentile(lts, 50),
+    p75: percentile(lts, 75),
+    p95: percentile(lts, 95),
+  };
+  const fmt = v => lts.length ? v.toFixed(0) + '<span>dni</span>' : '—<span>dni</span>';
+  document.getElementById('percP50').innerHTML = fmt(currentPercentiles.p50);
+  document.getElementById('percP75').innerHTML = fmt(currentPercentiles.p75);
+  document.getElementById('percP95').innerHTML = fmt(currentPercentiles.p95);
+  updateStats(source);
+  renderDistribution(source);
+  renderOutliers(source);
+  chart.data.datasets = ['S','M','L'].map(sz => buildDataset(sz, source));
+  chart.update();
+}
+
+fromInput.addEventListener('change', () => { clearPresetActive(); applyFilter(); });
+toInput.addEventListener('change', () => { clearPresetActive(); applyFilter(); });
+
+// Presets
+function clearPresetActive(){
+  document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
+}
+document.querySelectorAll('#presets button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clearPresetActive();
+    btn.classList.add('active');
+    const p = btn.dataset.preset;
+    let from = dataMin, to = dataMax;
+    if (p === '2024'){ from = new Date('2024-01-01'); to = new Date('2024-12-31'); }
+    else if (p === '2025'){ from = new Date('2025-01-01'); to = new Date('2025-12-31'); }
+    else if (p === 'last3' || p === 'last6' || p === 'last12'){
+      const months = p === 'last3' ? 3 : p === 'last6' ? 6 : 12;
+      to = dataMax;
+      from = new Date(dataMax);
+      from.setMonth(from.getMonth() - months);
+    }
+    // Clamp into data range
+    if (from < dataMin) from = dataMin;
+    if (to > dataMax) to = dataMax;
+    fromInput.value = toISO(from);
+    toInput.value = toISO(to);
+    applyFilter();
+  });
+});
+
+// Legend
+document.querySelectorAll('#legend button').forEach(btn=>{
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    const sz = btn.dataset.size;
+    if (btn.classList.contains('active')) hiddenSizes.delete(sz);
+    else hiddenSizes.add(sz);
+    const idx = chart.data.datasets.findIndex(d => d.label === sz);
+    if (idx >= 0){
+      chart.data.datasets[idx].hidden = hiddenSizes.has(sz);
+      chart.update();
+    }
+  });
+});
+
+// Initial render
+applyFilter();
+</script>
+
+</body>
+</html>
