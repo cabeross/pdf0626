@@ -216,7 +216,7 @@
     <div class="guide-items">
       <div class="guide-item">
         <div class="gtitle"><span class="gnum">01</span>Scatterplot tasków</div>
-        <div class="gtext">Każda kropka = jeden task. <b>Oś X</b> — data ukończenia, <b>oś Y</b> — czas obsługi w dniach. <b>Kolor</b> — rozmiar (S/M/L). Trzy poziome linie przerywane to percentyle <b>P50</b> (mediana), <b>P75</b> i <b>P95</b> — bursztynowa P95 to „najgorszy realistyczny" czas obsługi. <b>Kliknij kropkę</b>, żeby wyłączyć task z analizy.</div>
+        <div class="gtext">Każda kropka = jeden task. <b>Oś X</b> — data ukończenia, <b>oś Y</b> — czas obsługi w dniach. <b>Kolor</b> — rozmiar (S/M/L). Trzy poziome linie przerywane to percentyle <b>P50</b> (mediana), <b>P75</b> i <b>P95</b> — bursztynowa P95 to „najgorszy realistyczny" czas obsługi. <b>Kliknij kropkę</b>, żeby wyłączyć task z analizy (zostanie na wykresie wyszarzony); kliknij szarą kropkę, żeby włączyć ją z powrotem.</div>
       </div>
       <div class="guide-item">
         <div class="gtitle"><span class="gnum">02</span>Rozkład per rozmiar</div>
@@ -306,7 +306,7 @@
   <div class="panel">
     <div class="panel-head">
       <div class="panel-title">Czas obsługi × rozmiar taska
-        <small>Oś X — data ukończenia · Oś Y — czas obsługi (dni) · linie przerywane — percentyle P50 / P75 / P95 · <b style="color:var(--m)">kliknij kropkę aby wyłączyć task</b></small>
+        <small>Oś X — data ukończenia · Oś Y — czas obsługi (dni) · linie przerywane — percentyle P50 / P75 / P95 · <b style="color:var(--m)">kliknij kropkę, aby wyłączyć / włączyć task</b></small>
       </div>
       <div class="legend" id="legend">
         <button data-size="S" class="active"><span class="sw" style="background:var(--s)"></span>S</button>
@@ -473,19 +473,32 @@ function filteredRecords(){
   });
 }
 
+// Used for the chart only — keeps excluded items so they can be drawn dimmed.
+function recordsInRange(){
+  const from = new Date(fromInput.value + 'T00:00:00').getTime();
+  const to = new Date(toInput.value + 'T23:59:59').getTime();
+  return records.filter(r => {
+    const t = new Date(r.date).getTime();
+    return t >= from && t <= to;
+  });
+}
+
+const EXCLUDED_COLOR = '#5d6678';
+
 function buildDataset(sz, source){
+  const items = source.filter(r=>r.size===sz);
   return {
     label: sz,
-    data: source.filter(r=>r.size===sz).map(r=>({
+    data: items.map(r=>({
       x: new Date(r.date).getTime(),
       y: r.leadtime,
       r: radiusFor(),
       _raw: r
     })),
-    backgroundColor: COLORS[sz] + 'b3',
-    borderColor: COLORS[sz],
-    borderWidth: 1.5,
-    hoverBackgroundColor: COLORS[sz] + 'e6',
+    backgroundColor: items.map(r => excludedIds.has(r.id) ? EXCLUDED_COLOR + '33' : COLORS[sz] + 'b3'),
+    borderColor:     items.map(r => excludedIds.has(r.id) ? EXCLUDED_COLOR + '88' : COLORS[sz]),
+    borderWidth:     items.map(r => excludedIds.has(r.id) ? 1 : 1.5),
+    hoverBackgroundColor: items.map(r => excludedIds.has(r.id) ? EXCLUDED_COLOR + '55' : COLORS[sz] + 'e6'),
     hoverBorderColor: '#fff',
     hidden: hiddenSizes.has(sz),
   };
@@ -609,15 +622,19 @@ const chart = new Chart(ctx, {
         callbacks: {
           title(items){
             const r = items[0].raw._raw;
-            return 'Rozmiar ' + r.size + ' — ' + SIZE_LABEL[r.size];
+            const excluded = excludedIds.has(r.id);
+            return 'Rozmiar ' + r.size + ' — ' + SIZE_LABEL[r.size] + (excluded ? ' (wyłączony)' : '');
           },
           label(item){
             const r = item.raw._raw;
             const d = new Date(r.date);
-            return [
+            const lines = [
               'Czas obsługi: ' + r.leadtime + ' dni',
               'Data ukończenia: ' + d.toLocaleDateString('pl-PL')
             ];
+            if (excludedIds.has(r.id)) lines.push('Kliknij, aby włączyć z powrotem');
+            else lines.push('Kliknij, aby wyłączyć z analizy');
+            return lines;
           }
         }
       }
@@ -878,8 +895,8 @@ function applyFilter(){
   renderOutliers(source);
   renderTable();
 
-  // Rebuild chart datasets
-  chart.data.datasets = ['S','M','L'].map(sz => buildDataset(sz, source));
+  // Rebuild chart datasets — uses broader set so excluded points stay visible (dimmed)
+  chart.data.datasets = ['S','M','L'].map(sz => buildDataset(sz, recordsInRange()));
   chart.update();
 
   // Sync slider position to match dates
@@ -981,14 +998,26 @@ chartCanvas.addEventListener('click', (evt) => {
   const dp = chart.data.datasets[datasetIndex].data[index];
   if (!dp || !dp._raw) return;
   const r = dp._raw;
-  excludedIds.add(r.id);
   const d = new Date(r.date);
   const dateStr = d.toLocaleDateString('pl-PL');
-  showToast(
-    `Wyłączono task <b>${r.leadtime} dni</b> · ${r.size} · ${dateStr}`,
-    COLORS[r.size],
-    () => { excludedIds.delete(r.id); applyFilter(); }
-  );
+
+  if (excludedIds.has(r.id)){
+    // Re-include
+    excludedIds.delete(r.id);
+    showToast(
+      `Włączono task <b>${r.leadtime} dni</b> · ${r.size} · ${dateStr}`,
+      COLORS[r.size],
+      () => { excludedIds.add(r.id); applyFilter(); }
+    );
+  } else {
+    // Exclude
+    excludedIds.add(r.id);
+    showToast(
+      `Wyłączono task <b>${r.leadtime} dni</b> · ${r.size} · ${dateStr}`,
+      EXCLUDED_COLOR,
+      () => { excludedIds.delete(r.id); applyFilter(); }
+    );
+  }
   applyFilter();
 });
 
