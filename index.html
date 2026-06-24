@@ -120,8 +120,9 @@
 
   .guide{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--border);border-left:3px solid var(--m);border-radius:10px;padding:16px 20px;margin-bottom:22px;}
   .guide h4{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);margin:0 0 12px;font-weight:500;}
-  .guide-items{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-  @media (max-width:880px){ .guide-items{grid-template-columns:1fr;} }
+  .guide-items{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1024px){ .guide-items{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .guide-items{grid-template-columns:1fr;} }
   .guide-item .gtitle{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
   .guide-item .gtitle .gnum{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);margin-right:6px;font-weight:400;}
   .guide-item .gtext{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.55;}
@@ -188,6 +189,43 @@
   .table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
   .table-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted-2);}
 
+  .xmr-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .xmr-panel .xmr-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:18px;flex-wrap:wrap;}
+  .xmr-panel .xmr-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;}
+  .xmr-panel .xmr-title small{display:block;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:3px;max-width:520px;line-height:1.5;}
+  .xmr-panel .xmr-summary{display:flex;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;}
+  .xmr-panel .xmr-stat{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+  .xmr-panel .xmr-stat .lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);}
+  .xmr-panel .xmr-stat .val{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-top:2px;}
+  .xmr-panel .xmr-stat .val.warn{color:var(--l);}
+  .xmr-panel .xmr-stat .val.ok{color:var(--s);}
+  .xmr-chart{position:relative;height:260px;margin-top:14px;}
+  .xmr-chart.mr{height:200px;margin-top:6px;}
+  .xmr-verdict{margin-top:16px;padding:14px 16px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;}
+  .xmr-verdict.in-control{background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.3);color:var(--text);}
+  .xmr-verdict.out-of-control{background:rgba(228,96,122,0.08);border:1px solid rgba(228,96,122,0.3);color:var(--text);}
+  .xmr-verdict .vlabel{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;margin-right:8px;}
+  .xmr-verdict.in-control .vlabel{color:var(--s);}
+  .xmr-verdict.out-of-control .vlabel{color:var(--l);}
+
+  .xmr-guide{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 6px;}
+  @media (max-width:1024px){ .xmr-guide{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .xmr-guide{grid-template-columns:1fr;} }
+  .xmr-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .xmr-card.accent-x{border-top:2px solid #9aa4b5;}
+  .xmr-card.accent-mr{border-top:2px solid var(--muted);}
+  .xmr-card.accent-signal{border-top:2px solid var(--l);}
+  .xmr-card.accent-stable{border-top:2px solid var(--s);}
+  .xmr-card .ctitle{font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.02em;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .xmr-card .ctitle .ctag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);font-weight:400;}
+  .xmr-card .ctext{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.55;}
+  .xmr-card .ctext b{color:var(--text);font-weight:500;}
+  .xmr-card .ctext code{background:var(--panel);padding:1px 5px;border-radius:3px;font-size:10.5px;color:var(--m);}
+  .xmr-card .ctext .red{color:#ff6b8a;}
+  .xmr-card .ctext .gray{color:#9aa4b5;}
+  .xmr-card .ctext ul{margin:6px 0 0;padding-left:14px;}
+  .xmr-card .ctext li{margin-bottom:3px;}
+
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
 
@@ -225,6 +263,10 @@
       <div class="guide-item">
         <div class="gtitle"><span class="gnum">03</span>Filtry i edycja</div>
         <div class="gtext">Zmień zakres dat <b>polami</b>, <b>suwakiem</b> lub <b>presetami</b>. W tabeli <b>odznacz wiersz</b>, żeby wyłączyć task z analizy — wszystkie wykresy i statystyki przeliczą się od razu. Możesz też <b>dodać własne taski</b> formularzem.</div>
+      </div>
+      <div class="guide-item">
+        <div class="gtitle"><span class="gnum">04</span>XmR — stabilność</div>
+        <div class="gtext">Wykres <b>indywidualnych obserwacji</b> z liniami kontrolnymi (UCL/LCL) i osobnym wykresem <b>zakresu ruchomego</b>. Czerwone kropki = sygnały specjalnych przyczyn. Gdy zero sygnałów → proces jest <b>stabilny i przewidywalny</b>.</div>
       </div>
     </div>
   </div>
@@ -399,6 +441,79 @@
         </table>
       </div>
     </div>
+  </div>
+
+  <div class="section-divider">
+    <span class="num">04</span>
+    <span class="stitle">Stabilność procesu — wykres XmR</span>
+    <span class="rule"></span>
+    <span class="ssub">Czy proces obsługi tasków jest przewidywalny? Wykres XmR pokazuje rzeczywiste czasy obsługi w czasie wraz z granicami kontrolnymi (UCL/LCL liczonymi z średniego zakresu ruchomego), oraz osobno sam zakres ruchomy. Punkty poza granicami to sygnały specjalnych przyczyn.</span>
+  </div>
+
+  <div class="xmr-panel">
+    <div class="xmr-head">
+      <div class="xmr-title">Wykres indywidualnych obserwacji (X) i zakresu ruchomego (mR)
+        <small>Klasyczna metoda SPC dla pojedynczych obserwacji (n=2). Stałe: <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">E2 = 2,66</code> · <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">D4 = 3,267</code> · <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">d2 = 1,128</code>.</small>
+      </div>
+      <div class="xmr-summary" id="xmrSummary"></div>
+    </div>
+
+    <div class="xmr-guide">
+      <div class="xmr-card accent-x">
+        <div class="ctitle">Wykres X <span class="ctag">górny</span></div>
+        <div class="ctext">
+          Każda kropka to jeden task w kolejności <b>chronologicznej</b>, kolor odpowiada rozmiarowi (S/M/L).
+          <ul>
+            <li><span class="gray">━ ━</span> linia CL = średnia <b>X̄</b></li>
+            <li><span class="red">┄ ┄</span> linie UCL/LCL = <b>X̄ ± 2,66·mR̄</b> ≈ ±3σ procesu</li>
+            <li>🔴 czerwona kropka = task <b>poza granicami</b> → sygnał</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card accent-mr">
+        <div class="ctitle">Wykres mR <span class="ctag">dolny</span></div>
+        <div class="ctext">
+          Każda kropka = <b>|task[i] − task[i−1]|</b> czyli skok względem poprzedniego taska. Pierwszy task nie ma mR — punktów jest n−1.
+          <ul>
+            <li><span class="gray">━ ━</span> linia CL = średni zakres ruchomy <b>mR̄</b></li>
+            <li><span class="red">┄ ┄</span> UCL = <b>3,267·mR̄</b> (LCL zawsze 0)</li>
+            <li>🔴 czerwona kropka = <b>nadzwyczajny skok</b> między tymi dwoma taskami</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card accent-signal">
+        <div class="ctitle">Co znaczy sygnał?</div>
+        <div class="ctext">
+          Sygnał to dowód, że na ten task wpłynęła <b>specjalna przyczyna</b> (zmiana zakresu, brak zasobów, awaria, zmiana zespołu, święto, klient itp.), nie zwykła zmienność procesu.
+          <ul>
+            <li>Wartościowe jest <b>pogrzebanie się w tym konkretnym taskiem</b></li>
+            <li>Sygnał na X i mR jednocześnie → punkt zwrotny w trendzie</li>
+            <li>Sygnał może być pozytywny (np. ekspresowo)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card accent-stable">
+        <div class="ctitle">Brak sygnału?</div>
+        <div class="ctext">
+          Proces jest <b>stabilny</b> — przewidywalny. Wahania to <b>naturalna zmienność</b> systemu, nie indywidualne pomyłki.
+          <ul>
+            <li><b>Nie reaguj</b> na każdą pojedynczą wartość ani „dlaczego ten dłuższy?"</li>
+            <li>Aby skrócić czasy musisz zmienić <b>cały proces</b>, nie pojedyncze taski</li>
+            <li>Zakres między LCL a UCL to twoja <b>realna obietnica klientowi</b></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="xmr-chart">
+      <canvas id="xChart"></canvas>
+    </div>
+    <div class="xmr-chart mr">
+      <canvas id="mrChart"></canvas>
+    </div>
+    <div class="xmr-verdict" id="xmrVerdict"></div>
   </div>
 
   <footer>
@@ -893,6 +1008,7 @@ function applyFilter(){
   updateStats(source);
   renderDistribution(source);
   renderOutliers(source);
+  renderXmR(source);
   renderTable();
 
   // Rebuild chart datasets — uses broader set so excluded points stay visible (dimmed)
@@ -958,6 +1074,238 @@ document.getElementById('excludeOutside').addEventListener('click', () => {
   });
   applyFilter();
 });
+
+// ---------- XmR (Individuals & Moving Range) ----------
+// Constants from SPC tables for n=2: 3/d2 where d2(2)=1.128 → 2.66; D4(2)=3.267
+const XMR_E2 = 2.66;
+const XMR_D4 = 3.267;
+
+function computeXmR(source){
+  const sorted = [...source].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const vals = sorted.map(r => r.leadtime);
+  const mr = [];
+  for (let i = 1; i < vals.length; i++) mr.push(Math.abs(vals[i] - vals[i-1]));
+  const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  const mrBar = mr.length ? mr.reduce((a,b)=>a+b,0)/mr.length : 0;
+  const sigma = mrBar / 1.128;
+  const UCL = mean + XMR_E2 * mrBar;
+  const LCL = Math.max(0, mean - XMR_E2 * mrBar);  // clamp at 0 (negative time impossible)
+  const UCL_mr = XMR_D4 * mrBar;
+  const xSignals = sorted.map((r,i) => vals[i] > UCL || vals[i] < LCL);
+  const mrSignals = mr.map(v => v > UCL_mr);
+  return { sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals };
+}
+
+let xChart = null, mrChart = null;
+
+function makeLimitDataset(label, value, color, dash, source){
+  if (!source.length) return null;
+  const firstX = new Date(source[0].date).getTime();
+  const lastX = new Date(source[source.length-1].date).getTime();
+  return {
+    label,
+    data: [{x:firstX, y:value}, {x:lastX, y:value}],
+    type: 'line',
+    borderColor: color,
+    borderWidth: 1.3,
+    borderDash: dash,
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    fill: false,
+    tension: 0,
+    order: 99,
+  };
+}
+
+const SIGNAL_RED = '#ff6b8a';
+
+function buildXChartData(xmr){
+  const { sorted, vals, UCL, LCL, mean, xSignals } = xmr;
+  const dataPoints = sorted.map((r,i) => ({
+    x: new Date(r.date).getTime(),
+    y: vals[i],
+    _raw: r,
+    _signal: xSignals[i],
+  }));
+  const ptColors = sorted.map((r,i) => xSignals[i] ? SIGNAL_RED : COLORS[r.size]);
+  const ptBorders = sorted.map((r,i) => xSignals[i] ? '#fff' : COLORS[r.size]);
+  const ptRadii = sorted.map((r,i) => xSignals[i] ? 6 : 4);
+
+  const series = {
+    label: 'Czas obsługi',
+    data: dataPoints,
+    type: 'line',
+    borderColor: 'rgba(236,239,243,0.45)',
+    borderWidth: 1.2,
+    pointBackgroundColor: ptColors,
+    pointBorderColor: ptBorders,
+    pointBorderWidth: 1.2,
+    pointRadius: ptRadii,
+    pointHoverRadius: 7,
+    fill: false,
+    tension: 0,
+    order: 1,
+  };
+  const datasets = [series];
+  const ucl = makeLimitDataset('UCL', UCL, SIGNAL_RED, [6,4], sorted);
+  const lcl = makeLimitDataset('LCL', LCL, SIGNAL_RED, [6,4], sorted);
+  const cl  = makeLimitDataset('CL',  mean, '#9aa4b5', [3,3], sorted);
+  if (ucl) datasets.push(ucl);
+  if (lcl) datasets.push(lcl);
+  if (cl)  datasets.push(cl);
+  return datasets;
+}
+
+function buildMRChartData(xmr){
+  const { sorted, mr, UCL_mr, mrBar, mrSignals } = xmr;
+  // mR[i] corresponds to sorted[i+1] (it's the |x[i+1]-x[i]|)
+  const dataPoints = mr.map((v,i) => ({
+    x: new Date(sorted[i+1].date).getTime(),
+    y: v,
+    _raw: sorted[i+1],
+    _signal: mrSignals[i],
+  }));
+  const ptColors  = mrSignals.map(s => s ? SIGNAL_RED : '#9aa4b5');
+  const ptBorders = mrSignals.map(s => s ? '#fff' : '#9aa4b5');
+  const ptRadii   = mrSignals.map(s => s ? 6 : 3.5);
+
+  const series = {
+    label: 'Zakres ruchomy',
+    data: dataPoints,
+    type: 'line',
+    borderColor: 'rgba(236,239,243,0.35)',
+    borderWidth: 1,
+    pointBackgroundColor: ptColors,
+    pointBorderColor: ptBorders,
+    pointBorderWidth: 1,
+    pointRadius: ptRadii,
+    pointHoverRadius: 7,
+    fill: false,
+    tension: 0,
+    order: 1,
+  };
+  const datasets = [series];
+  const sliceFromSecond = sorted.slice(1);
+  const ucl = makeLimitDataset('UCL mR', UCL_mr, SIGNAL_RED, [6,4], sliceFromSecond);
+  const cl  = makeLimitDataset('mR̄', mrBar, '#9aa4b5', [3,3], sliceFromSecond);
+  if (ucl) datasets.push(ucl);
+  if (cl)  datasets.push(cl);
+  return datasets;
+}
+
+function xmrTooltipCallbacks(){
+  return {
+    callbacks: {
+      title(items){
+        const raw = items[0].raw;
+        if (!raw._raw) return items[0].dataset.label;
+        const d = new Date(raw._raw.date);
+        return d.toLocaleDateString('pl-PL') + ' · ' + raw._raw.size;
+      },
+      label(item){
+        const raw = item.raw;
+        const lines = [item.dataset.label + ': ' + (typeof raw.y === 'number' ? raw.y.toFixed(0) : raw.y) + ' dni'];
+        if (raw._signal) lines.push('⚠ Sygnał — poza granicą kontrolną');
+        return lines;
+      }
+    }
+  };
+}
+
+function commonXmRScales(){
+  return {
+    x: {
+      type: 'time',
+      time: { unit: 'month', tooltipFormat: 'dd.MM.yyyy', displayFormats: { month: 'MM.yyyy' } },
+      grid: { color: '#222837' },
+      ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
+    },
+    y: {
+      beginAtZero: true,
+      grid: { color: '#222837' },
+      ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
+    }
+  };
+}
+
+function renderXmR(source){
+  const summaryEl = document.getElementById('xmrSummary');
+  const verdictEl = document.getElementById('xmrVerdict');
+
+  if (source.length < 2){
+    summaryEl.innerHTML = '';
+    verdictEl.className = 'xmr-verdict';
+    verdictEl.textContent = 'Za mało tasków w okresie, żeby policzyć XmR (potrzeba ≥ 2).';
+    if (xChart) { xChart.data.datasets = []; xChart.update(); }
+    if (mrChart){ mrChart.data.datasets = []; mrChart.update(); }
+    return;
+  }
+
+  const xmr = computeXmR(source);
+  const xSignalCount  = xmr.xSignals.filter(Boolean).length;
+  const mrSignalCount = xmr.mrSignals.filter(Boolean).length;
+  const totalSignals = xSignalCount + mrSignalCount;
+
+  // Summary
+  summaryEl.innerHTML = `
+    <div class="xmr-stat"><div class="lbl">Średnia (CL)</div><div class="val">${xmr.mean.toFixed(0)}<span style="font-size:10px;color:var(--muted);margin-left:3px;">dni</span></div></div>
+    <div class="xmr-stat"><div class="lbl">σ procesu</div><div class="val">${xmr.sigma.toFixed(1)}</div></div>
+    <div class="xmr-stat"><div class="lbl">UCL · LCL</div><div class="val">${xmr.UCL.toFixed(0)} · ${xmr.LCL.toFixed(0)}</div></div>
+    <div class="xmr-stat"><div class="lbl">Sygnały</div><div class="val ${totalSignals ? 'warn' : 'ok'}">${totalSignals}</div></div>
+  `;
+
+  // Verdict
+  if (totalSignals === 0){
+    verdictEl.className = 'xmr-verdict in-control';
+    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żadne obserwacje nie wykraczają poza granice kontrolne. Wahania mieszczą się w typowej zmienności procesu — nie ma sygnałów specjalnych przyczyn w wybranym okresie.`;
+  } else {
+    verdictEl.className = 'xmr-verdict out-of-control';
+    const parts = [];
+    if (xSignalCount) parts.push(`<b>${xSignalCount}</b> task${xSignalCount===1?'':'i'} z czasem obsługi poza UCL/LCL`);
+    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'a':'e'} skok${mrSignalCount===1?'':'i'} między kolejnymi taskami (mR > UCL)`);
+    verdictEl.innerHTML = `<span class="vlabel">Sygnały specjalnych przyczyn</span>${parts.join(' · ')}. Każdy taki punkt warto przeanalizować osobno — coś nietypowego wpłynęło na proces (zmiana zespołu, brak zasobów, zmiana zakresu zlecenia itp.).`;
+  }
+
+  // Update charts
+  if (!xChart){
+    xChart = new Chart(document.getElementById('xChart').getContext('2d'), {
+      type: 'line',
+      data: { datasets: [] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: commonXmRScales(),
+        plugins: {
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Czas obsługi' } },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            ...xmrTooltipCallbacks(),
+          }
+        }
+      }
+    });
+    mrChart = new Chart(document.getElementById('mrChart').getContext('2d'), {
+      type: 'line',
+      data: { datasets: [] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: commonXmRScales(),
+        plugins: {
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Zakres ruchomy' } },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            ...xmrTooltipCallbacks(),
+          }
+        }
+      }
+    });
+  }
+  xChart.data.datasets = buildXChartData(xmr);
+  mrChart.data.datasets = buildMRChartData(xmr);
+  xChart.update();
+  mrChart.update();
+}
 
 // ---------- Toast notifications ----------
 const toastEl = document.getElementById('toast');
