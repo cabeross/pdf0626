@@ -266,7 +266,7 @@
       </div>
       <div class="guide-item">
         <div class="gtitle"><span class="gnum">04</span>XmR — stabilność</div>
-        <div class="gtext">Wykres <b>indywidualnych obserwacji</b> z liniami kontrolnymi (UCL/LCL) i osobnym wykresem <b>zakresu ruchomego</b>. Czerwone kropki = sygnały specjalnych przyczyn. Gdy zero sygnałów → proces jest <b>stabilny i przewidywalny</b>.</div>
+        <div class="gtext">Wykres <b>indywidualnych obserwacji</b> z liniami naturalnych granic procesu (UNPL/LNPL) i osobnym wykresem <b>zakresu ruchomego</b>. Czerwone kropki = sygnały specjalnych przyczyn. Gdy zero sygnałów → proces jest <b>stabilny i przewidywalny</b>.</div>
       </div>
     </div>
   </div>
@@ -447,7 +447,7 @@
     <span class="num">04</span>
     <span class="stitle">Stabilność procesu — wykres XmR</span>
     <span class="rule"></span>
-    <span class="ssub">Czy proces obsługi tasków jest przewidywalny? Wykres XmR pokazuje rzeczywiste czasy obsługi w czasie wraz z granicami kontrolnymi (UCL/LCL liczonymi z średniego zakresu ruchomego), oraz osobno sam zakres ruchomy. Punkty poza granicami to sygnały specjalnych przyczyn.</span>
+    <span class="ssub">Osobny zbiór danych (Team_Cycle_Time_for_XMR.xlsx) — 30 tasków z datą startu, datą zamknięcia i cycle time. Czy proces jest przewidywalny? Wykres XmR pokazuje rzeczywiste cycle time w czasie wraz z naturalnymi granicami procesu (UNPL/LNPL = X̄ ± 2,66·mR̄), oraz osobno sam zakres ruchomy. Punkty poza granicami to sygnały specjalnych przyczyn.</span>
   </div>
 
   <div class="xmr-panel">
@@ -462,11 +462,12 @@
       <div class="xmr-card accent-x">
         <div class="ctitle">Wykres X <span class="ctag">górny</span></div>
         <div class="ctext">
-          Każda kropka to jeden task w kolejności <b>chronologicznej</b>, kolor odpowiada rozmiarowi (S/M/L).
+          Każda kropka to jeden task (z osobnego zbioru <b>cycle time</b>) w kolejności <b>chronologicznej</b> wg daty zamknięcia.
           <ul>
             <li><span class="gray">━ ━</span> linia CL = średnia <b>X̄</b></li>
-            <li><span class="red">┄ ┄</span> linie UCL/LCL = <b>X̄ ± 2,66·mR̄</b> ≈ ±3σ procesu</li>
+            <li><span class="red">┄ ┄</span> linie UNPL/LNPL = <b>X̄ ± 2,66·mR̄</b> ≈ ±3σ procesu</li>
             <li>🔴 czerwona kropka = task <b>poza granicami</b> → sygnał</li>
+            <li><b>Kliknij kropkę</b>, żeby wykluczyć/przywrócić task — tak jak w tabeli poniżej</li>
           </ul>
         </div>
       </div>
@@ -477,7 +478,7 @@
           Każda kropka = <b>|task[i] − task[i−1]|</b> czyli skok względem poprzedniego taska. Pierwszy task nie ma mR — punktów jest n−1.
           <ul>
             <li><span class="gray">━ ━</span> linia CL = średni zakres ruchomy <b>mR̄</b></li>
-            <li><span class="red">┄ ┄</span> UCL = <b>3,267·mR̄</b> (LCL zawsze 0)</li>
+            <li><span class="red">┄ ┄</span> UNPL = <b>3,267·mR̄</b> (LNPL zawsze 0)</li>
             <li>🔴 czerwona kropka = <b>nadzwyczajny skok</b> między tymi dwoma taskami</li>
           </ul>
         </div>
@@ -502,7 +503,7 @@
           <ul>
             <li><b>Nie reaguj</b> na każdą pojedynczą wartość ani „dlaczego ten dłuższy?"</li>
             <li>Aby skrócić czasy musisz zmienić <b>cały proces</b>, nie pojedyncze taski</li>
-            <li>Zakres między LCL a UCL to twoja <b>realna obietnica klientowi</b></li>
+            <li>Zakres między LNPL a UNPL to twoja <b>realna obietnica klientowi</b></li>
           </ul>
         </div>
       </div>
@@ -514,6 +515,28 @@
       <canvas id="mrChart"></canvas>
     </div>
     <div class="xmr-verdict" id="xmrVerdict"></div>
+
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+      <div class="table-toolbar">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);">Tabela cycle time</span>
+        <span style="font-size:11px;color:var(--muted-2);">— odznacz wiersz, aby wykluczyć task z wykresów XmR (kliknięcie kropki na wykresie X działa tak samo)</span>
+        <span class="count" id="cycleTableCount"></span>
+      </div>
+      <div class="table-scroll" style="max-height:280px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:32px;"></th>
+              <th>#</th>
+              <th>Started</th>
+              <th>Closed</th>
+              <th class="num">Cycle time (dni)</th>
+            </tr>
+          </thead>
+          <tbody id="cycleTableBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <footer>
@@ -1008,7 +1031,6 @@ function applyFilter(){
   updateStats(source);
   renderDistribution(source);
   renderOutliers(source);
-  renderXmR(source);
   renderTable();
 
   // Rebuild chart datasets — uses broader set so excluded points stay visible (dimmed)
@@ -1075,14 +1097,21 @@ document.getElementById('excludeOutside').addEventListener('click', () => {
   applyFilter();
 });
 
-// ---------- XmR (Individuals & Moving Range) ----------
+// Cycle Time dataset — dedicated source for the XmR section (Team_Cycle_Time_for_XMR.xlsx)
+const cycleRecords = [{"id": 1, "started": "2023-11-28", "closed": "2024-01-05", "cycleTime": 38}, {"id": 2, "started": "2023-12-20", "closed": "2024-01-11", "cycleTime": 24}, {"id": 3, "started": "2024-01-02", "closed": "2024-01-16", "cycleTime": 14}, {"id": 4, "started": "2024-01-10", "closed": "2024-01-17", "cycleTime": 9}, {"id": 5, "started": "2024-01-18", "closed": "2024-01-22", "cycleTime": 4}, {"id": 6, "started": "2024-01-03", "closed": "2024-01-26", "cycleTime": 25}, {"id": 7, "started": "2024-01-10", "closed": "2024-01-29", "cycleTime": 19}, {"id": 8, "started": "2023-12-19", "closed": "2024-02-06", "cycleTime": 51}, {"id": 9, "started": "2023-12-26", "closed": "2024-02-12", "cycleTime": 48}, {"id": 10, "started": "2024-02-02", "closed": "2024-02-15", "cycleTime": 15}, {"id": 11, "started": "2024-01-26", "closed": "2024-02-17", "cycleTime": 22}, {"id": 12, "started": "2024-01-09", "closed": "2024-02-18", "cycleTime": 42}, {"id": 13, "started": "2024-02-02", "closed": "2024-02-19", "cycleTime": 17}, {"id": 14, "started": "2024-02-16", "closed": "2024-02-21", "cycleTime": 7}, {"id": 15, "started": "2024-02-23", "closed": "2024-02-28", "cycleTime": 5}, {"id": 16, "started": "2024-02-20", "closed": "2024-03-12", "cycleTime": 20}, {"id": 17, "started": "2024-01-12", "closed": "2024-03-14", "cycleTime": 63}, {"id": 18, "started": "2024-03-13", "closed": "2024-03-19", "cycleTime": 6}, {"id": 19, "started": "2024-01-25", "closed": "2024-03-20", "cycleTime": 56}, {"id": 20, "started": "2024-02-28", "closed": "2024-03-22", "cycleTime": 24}, {"id": 21, "started": "2024-02-28", "closed": "2024-03-22", "cycleTime": 22}, {"id": 22, "started": "2024-02-06", "closed": "2024-03-26", "cycleTime": 50}, {"id": 23, "started": "2024-03-21", "closed": "2024-03-27", "cycleTime": 8}, {"id": 24, "started": "2024-03-26", "closed": "2024-03-28", "cycleTime": 2}, {"id": 25, "started": "2024-03-28", "closed": "2024-03-29", "cycleTime": 3}, {"id": 26, "started": "2024-03-22", "closed": "2024-03-30", "cycleTime": 8}, {"id": 27, "started": "2024-02-26", "closed": "2024-04-01", "cycleTime": 36}, {"id": 28, "started": "2024-03-06", "closed": "2024-04-02", "cycleTime": 27}, {"id": 29, "started": "2024-03-13", "closed": "2024-04-09", "cycleTime": 29}, {"id": 30, "started": "2024-03-20", "closed": "2024-04-09", "cycleTime": 20}];
+cycleRecords.forEach(r => { r.uid = 'c' + r.id; });
+const cycleExcluded = new Set();
+
+function cycleActive(){
+  return cycleRecords.filter(r => !cycleExcluded.has(r.uid));
+}
 // Constants from SPC tables for n=2: 3/d2 where d2(2)=1.128 → 2.66; D4(2)=3.267
 const XMR_E2 = 2.66;
 const XMR_D4 = 3.267;
 
-function computeXmR(source){
-  const sorted = [...source].sort((a,b) => new Date(a.date) - new Date(b.date));
-  const vals = sorted.map(r => r.leadtime);
+function computeXmR(source, dateField, valueField){
+  const sorted = [...source].sort((a,b) => new Date(a[dateField]) - new Date(b[dateField]));
+  const vals = sorted.map(r => r[valueField]);
   const mr = [];
   for (let i = 1; i < vals.length; i++) mr.push(Math.abs(vals[i] - vals[i-1]));
   const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
@@ -1093,15 +1122,15 @@ function computeXmR(source){
   const UCL_mr = XMR_D4 * mrBar;
   const xSignals = sorted.map((r,i) => vals[i] > UCL || vals[i] < LCL);
   const mrSignals = mr.map(v => v > UCL_mr);
-  return { sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals };
+  return { sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals, dateField, valueField };
 }
 
 let xChart = null, mrChart = null;
 
-function makeLimitDataset(label, value, color, dash, source){
+function makeLimitDataset(label, value, color, dash, source, dateField){
   if (!source.length) return null;
-  const firstX = new Date(source[0].date).getTime();
-  const lastX = new Date(source[source.length-1].date).getTime();
+  const firstX = new Date(source[0][dateField]).getTime();
+  const lastX = new Date(source[source.length-1][dateField]).getTime();
   return {
     label,
     data: [{x:firstX, y:value}, {x:lastX, y:value}],
@@ -1118,21 +1147,22 @@ function makeLimitDataset(label, value, color, dash, source){
 }
 
 const SIGNAL_RED = '#ff6b8a';
+const CYCLE_COLOR = '#4fd1c5';
 
 function buildXChartData(xmr){
-  const { sorted, vals, UCL, LCL, mean, xSignals } = xmr;
+  const { sorted, vals, UCL, LCL, mean, xSignals, dateField, valueField } = xmr;
   const dataPoints = sorted.map((r,i) => ({
-    x: new Date(r.date).getTime(),
+    x: new Date(r[dateField]).getTime(),
     y: vals[i],
     _raw: r,
     _signal: xSignals[i],
   }));
-  const ptColors = sorted.map((r,i) => xSignals[i] ? SIGNAL_RED : COLORS[r.size]);
-  const ptBorders = sorted.map((r,i) => xSignals[i] ? '#fff' : COLORS[r.size]);
-  const ptRadii = sorted.map((r,i) => xSignals[i] ? 6 : 4);
+  const ptColors  = sorted.map((r,i) => xSignals[i] ? SIGNAL_RED : CYCLE_COLOR);
+  const ptBorders = sorted.map((r,i) => xSignals[i] ? '#fff' : CYCLE_COLOR);
+  const ptRadii   = sorted.map((r,i) => xSignals[i] ? 6 : 4);
 
   const series = {
-    label: 'Czas obsługi',
+    label: 'Cycle time',
     data: dataPoints,
     type: 'line',
     borderColor: 'rgba(236,239,243,0.45)',
@@ -1147,9 +1177,9 @@ function buildXChartData(xmr){
     order: 1,
   };
   const datasets = [series];
-  const ucl = makeLimitDataset('UCL', UCL, SIGNAL_RED, [6,4], sorted);
-  const lcl = makeLimitDataset('LCL', LCL, SIGNAL_RED, [6,4], sorted);
-  const cl  = makeLimitDataset('CL',  mean, '#9aa4b5', [3,3], sorted);
+  const ucl = makeLimitDataset('UNPL', UCL, SIGNAL_RED, [6,4], sorted, dateField);
+  const lcl = makeLimitDataset('LNPL', LCL, SIGNAL_RED, [6,4], sorted, dateField);
+  const cl  = makeLimitDataset('CL',  mean, '#9aa4b5', [3,3], sorted, dateField);
   if (ucl) datasets.push(ucl);
   if (lcl) datasets.push(lcl);
   if (cl)  datasets.push(cl);
@@ -1157,10 +1187,10 @@ function buildXChartData(xmr){
 }
 
 function buildMRChartData(xmr){
-  const { sorted, mr, UCL_mr, mrBar, mrSignals } = xmr;
+  const { sorted, mr, UCL_mr, mrBar, mrSignals, dateField } = xmr;
   // mR[i] corresponds to sorted[i+1] (it's the |x[i+1]-x[i]|)
   const dataPoints = mr.map((v,i) => ({
-    x: new Date(sorted[i+1].date).getTime(),
+    x: new Date(sorted[i+1][dateField]).getTime(),
     y: v,
     _raw: sorted[i+1],
     _signal: mrSignals[i],
@@ -1186,8 +1216,8 @@ function buildMRChartData(xmr){
   };
   const datasets = [series];
   const sliceFromSecond = sorted.slice(1);
-  const ucl = makeLimitDataset('UCL mR', UCL_mr, SIGNAL_RED, [6,4], sliceFromSecond);
-  const cl  = makeLimitDataset('mR̄', mrBar, '#9aa4b5', [3,3], sliceFromSecond);
+  const ucl = makeLimitDataset('UNPL mR', UCL_mr, SIGNAL_RED, [6,4], sliceFromSecond, dateField);
+  const cl  = makeLimitDataset('mR̄', mrBar, '#9aa4b5', [3,3], sliceFromSecond, dateField);
   if (ucl) datasets.push(ucl);
   if (cl)  datasets.push(cl);
   return datasets;
@@ -1199,12 +1229,17 @@ function xmrTooltipCallbacks(){
       title(items){
         const raw = items[0].raw;
         if (!raw._raw) return items[0].dataset.label;
-        const d = new Date(raw._raw.date);
-        return d.toLocaleDateString('pl-PL') + ' · ' + raw._raw.size;
+        const r = raw._raw;
+        const d = new Date(r.closed);
+        return 'Task #' + r.id + ' · zamknięty ' + d.toLocaleDateString('pl-PL');
       },
       label(item){
         const raw = item.raw;
+        const r = raw._raw;
         const lines = [item.dataset.label + ': ' + (typeof raw.y === 'number' ? raw.y.toFixed(0) : raw.y) + ' dni'];
+        if (item.dataset.label !== 'Zakres ruchomy' && r){
+          lines.push('Started: ' + new Date(r.started).toLocaleDateString('pl-PL'));
+        }
         if (raw._signal) lines.push('⚠ Sygnał — poza granicą kontrolną');
         return lines;
       }
@@ -1228,20 +1263,21 @@ function commonXmRScales(){
   };
 }
 
-function renderXmR(source){
+function renderXmR(){
+  const source = cycleActive();
   const summaryEl = document.getElementById('xmrSummary');
   const verdictEl = document.getElementById('xmrVerdict');
 
   if (source.length < 2){
     summaryEl.innerHTML = '';
     verdictEl.className = 'xmr-verdict';
-    verdictEl.textContent = 'Za mało tasków w okresie, żeby policzyć XmR (potrzeba ≥ 2).';
+    verdictEl.textContent = 'Za mało tasków w zbiorze, żeby policzyć XmR (potrzeba ≥ 2).';
     if (xChart) { xChart.data.datasets = []; xChart.update(); }
     if (mrChart){ mrChart.data.datasets = []; mrChart.update(); }
     return;
   }
 
-  const xmr = computeXmR(source);
+  const xmr = computeXmR(source, 'closed', 'cycleTime');
   const xSignalCount  = xmr.xSignals.filter(Boolean).length;
   const mrSignalCount = xmr.mrSignals.filter(Boolean).length;
   const totalSignals = xSignalCount + mrSignalCount;
@@ -1250,19 +1286,19 @@ function renderXmR(source){
   summaryEl.innerHTML = `
     <div class="xmr-stat"><div class="lbl">Średnia (CL)</div><div class="val">${xmr.mean.toFixed(0)}<span style="font-size:10px;color:var(--muted);margin-left:3px;">dni</span></div></div>
     <div class="xmr-stat"><div class="lbl">σ procesu</div><div class="val">${xmr.sigma.toFixed(1)}</div></div>
-    <div class="xmr-stat"><div class="lbl">UCL · LCL</div><div class="val">${xmr.UCL.toFixed(0)} · ${xmr.LCL.toFixed(0)}</div></div>
+    <div class="xmr-stat"><div class="lbl">UNPL · LNPL</div><div class="val">${xmr.UCL.toFixed(0)} · ${xmr.LCL.toFixed(0)}</div></div>
     <div class="xmr-stat"><div class="lbl">Sygnały</div><div class="val ${totalSignals ? 'warn' : 'ok'}">${totalSignals}</div></div>
   `;
 
   // Verdict
   if (totalSignals === 0){
     verdictEl.className = 'xmr-verdict in-control';
-    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żadne obserwacje nie wykraczają poza granice kontrolne. Wahania mieszczą się w typowej zmienności procesu — nie ma sygnałów specjalnych przyczyn w wybranym okresie.`;
+    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żadne obserwacje nie wykraczają poza granice kontrolne. Wahania mieszczą się w typowej zmienności procesu — nie ma sygnałów specjalnych przyczyn w tym zbiorze.`;
   } else {
     verdictEl.className = 'xmr-verdict out-of-control';
     const parts = [];
-    if (xSignalCount) parts.push(`<b>${xSignalCount}</b> task${xSignalCount===1?'':'i'} z czasem obsługi poza UCL/LCL`);
-    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'a':'e'} skok${mrSignalCount===1?'':'i'} między kolejnymi taskami (mR > UCL)`);
+    if (xSignalCount) parts.push(`<b>${xSignalCount}</b> task${xSignalCount===1?'':'i'} z cycle time poza UNPL/LNPL`);
+    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'a':'e'} skok${mrSignalCount===1?'':'i'} między kolejnymi taskami (mR > UNPL)`);
     verdictEl.innerHTML = `<span class="vlabel">Sygnały specjalnych przyczyn</span>${parts.join(' · ')}. Każdy taki punkt warto przeanalizować osobno — coś nietypowego wpłynęło na proces (zmiana zespołu, brak zasobów, zmiana zakresu zlecenia itp.).`;
   }
 
@@ -1274,8 +1310,9 @@ function renderXmR(source){
       options: {
         responsive: true, maintainAspectRatio: false,
         scales: commonXmRScales(),
+        onClick: (evt) => handleXChartClick(evt),
         plugins: {
-          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Czas obsługi' } },
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Cycle time' } },
           tooltip: {
             backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
             titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
@@ -1305,6 +1342,55 @@ function renderXmR(source){
   mrChart.data.datasets = buildMRChartData(xmr);
   xChart.update();
   mrChart.update();
+  renderCycleTable();
+}
+
+function handleXChartClick(evt){
+  const points = xChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+  if (!points.length) return;
+  const { datasetIndex, index } = points[0];
+  const dp = xChart.data.datasets[datasetIndex].data[index];
+  if (!dp || !dp._raw) return;
+  const r = dp._raw;
+  const dateStr = new Date(r.closed).toLocaleDateString('pl-PL');
+  if (cycleExcluded.has(r.uid)){
+    cycleExcluded.delete(r.uid);
+    showToast(`Włączono task #${r.id} <b>${r.cycleTime} dni</b> · ${dateStr}`, CYCLE_COLOR, () => { cycleExcluded.add(r.uid); renderXmR(); });
+  } else {
+    cycleExcluded.add(r.uid);
+    showToast(`Wyłączono task #${r.id} <b>${r.cycleTime} dni</b> · ${dateStr}`, EXCLUDED_COLOR, () => { cycleExcluded.delete(r.uid); renderXmR(); });
+  }
+  renderXmR();
+}
+
+function renderCycleTable(){
+  const tbody = document.getElementById('cycleTableBody');
+  if (!tbody) return;
+  const sorted = [...cycleRecords].sort((a,b) => new Date(b.closed) - new Date(a.closed));
+  tbody.innerHTML = sorted.map(r => {
+    const excluded = cycleExcluded.has(r.uid);
+    const sd = new Date(r.started).toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+    const cd = new Date(r.closed).toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+    return `<tr class="${excluded ? 'excluded' : ''}" data-uid="${r.uid}">
+      <td><input type="checkbox" data-uid="${r.uid}" ${excluded ? '' : 'checked'}></td>
+      <td>#${r.id}</td>
+      <td>${sd}</td>
+      <td>${cd}</td>
+      <td class="num">${r.cycleTime}</td>
+    </tr>`;
+  }).join('');
+  const active = cycleRecords.length - cycleExcluded.size;
+  const cnt = document.getElementById('cycleTableCount');
+  if (cnt) cnt.textContent = active + ' aktywnych z ' + cycleRecords.length;
+
+  tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const uid = cb.dataset.uid;
+      if (cb.checked) cycleExcluded.delete(uid);
+      else cycleExcluded.add(uid);
+      renderXmR();
+    });
+  });
 }
 
 // ---------- Toast notifications ----------
@@ -1383,6 +1469,16 @@ rebuildSliderBounds();
 fromInput.value = toISO(dataMin);
 toInput.value = toISO(dataMax);
 applyFilter();
+renderXmR();
+
+// XmR X-chart hover cursor
+const xChartCanvas = document.getElementById('xChart');
+xChartCanvas.addEventListener('mousemove', (evt) => {
+  if (!xChart) return;
+  const points = xChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+  xChartCanvas.style.cursor = points.length ? 'pointer' : 'default';
+});
+xChartCanvas.addEventListener('mouseleave', () => { xChartCanvas.style.cursor = 'default'; });
 </script>
 
 </body>
