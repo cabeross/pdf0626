@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Mapa czasów realizacji — 2024/25</title>
+<title>Mapa czasów obsługi tasków — 2024/25</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -57,7 +57,7 @@
   .size-hint .ex{display:inline-flex;align-items:center;gap:6px;}
   .size-hint .circle{border-radius:50%;background:var(--muted-2);opacity:.55;display:inline-block;}
 
-  .filterbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px;}
+  .filterbar{display:flex;flex-direction:column;align-items:stretch;gap:6px;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px;}
   .filterbar .flabel{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-right:2px;}
   .filterbar .field{display:flex;flex-direction:column;gap:3px;}
   .filterbar .field span{font-size:10px;color:var(--muted-2);letter-spacing:.06em;text-transform:uppercase;}
@@ -108,6 +108,76 @@
   .out-item .out-val .unit{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10.5px;color:var(--muted);display:block;margin-top:1px;}
   .out-empty{color:var(--muted-2);font-size:12px;padding:12px 0;}
 
+  .guide{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--border);border-left:3px solid var(--m);border-radius:10px;padding:16px 20px;margin-bottom:22px;}
+  .guide h4{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);margin:0 0 12px;font-weight:500;}
+  .guide-items{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media (max-width:880px){ .guide-items{grid-template-columns:1fr;} }
+  .guide-item .gtitle{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .guide-item .gtitle .gnum{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);margin-right:6px;font-weight:400;}
+  .guide-item .gtext{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.55;}
+  .guide-item .gtext b{color:var(--text);font-weight:500;}
+  /* Dual range slider */
+  .slider-wrap{width:100%;margin-top:8px;}
+  .slider-track-wrap{position:relative;height:24px;margin:0 8px;}
+  .slider-track{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;height:4px;background:var(--border);border-radius:2px;}
+  .slider-track-active{position:absolute;top:50%;transform:translateY(-50%);height:4px;background:linear-gradient(90deg,var(--s),var(--m),var(--l));border-radius:2px;}
+  .slider-input{position:absolute;top:0;left:0;width:100%;height:24px;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;outline:none;}
+  .slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--text);border:2px solid var(--bg);border-radius:50%;cursor:grab;pointer-events:auto;box-shadow:0 0 0 1px var(--muted-2);}
+  .slider-input::-webkit-slider-thumb:active{cursor:grabbing;background:var(--m);}
+  .slider-input::-moz-range-thumb{width:18px;height:18px;background:var(--text);border:2px solid var(--bg);border-radius:50%;cursor:grab;pointer-events:auto;box-shadow:0 0 0 1px var(--muted-2);}
+  .slider-labels{display:flex;justify-content:space-between;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted-2);padding:0 4px;}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+  .slider-row .slabel{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);flex:0 0 auto;}
+  .slider-row .slider-wrap{flex:1;}
+
+  /* Data entry & table sections */
+  .data-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:20px;}
+  @media (max-width:900px){ .data-grid{grid-template-columns:1fr;} }
+
+  .add-panel,.table-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .add-panel h3,.table-panel h3{font-family:'Space Grotesk',sans-serif;margin:0 0 4px;font-size:15px;font-weight:600;}
+  .add-panel .sublead,.table-panel .sublead{font-size:11px;color:var(--muted-2);margin-bottom:16px;}
+
+  .add-form{display:flex;flex-direction:column;gap:12px;}
+  .add-form .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+  .add-form .field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
+  .add-form .field span{font-size:10px;color:var(--muted-2);letter-spacing:.06em;text-transform:uppercase;}
+  .add-form input,.add-form select{background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;color-scheme:dark;}
+  .add-form input:focus,.add-form select:focus{outline:none;border-color:var(--muted-2);}
+  .add-form .size-pick{display:flex;gap:6px;}
+  .add-form .size-pick label{flex:1;background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:8px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s ease;}
+  .add-form .size-pick input{display:none;}
+  .add-form .size-pick input:checked + label{color:var(--bg);font-weight:600;}
+  .add-form .size-pick input[value="S"]:checked + label{background:var(--s);border-color:var(--s);}
+  .add-form .size-pick input[value="M"]:checked + label{background:var(--m);border-color:var(--m);}
+  .add-form .size-pick input[value="L"]:checked + label{background:var(--l);border-color:var(--l);}
+  .add-form button.submit{background:var(--text);color:var(--bg);border:none;border-radius:6px;padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s ease;}
+  .add-form button.submit:hover{background:var(--m);}
+  .add-form .formhint{font-size:10.5px;color:var(--muted-2);margin-top:4px;}
+  .add-form .formerr{font-size:11px;color:var(--l);margin-top:4px;min-height:14px;}
+
+  .table-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
+  .table-toolbar button{background:transparent;border:1px solid var(--border);border-radius:5px;padding:5px 10px;color:var(--muted);font-family:inherit;font-size:11px;cursor:pointer;}
+  .table-toolbar button:hover{color:var(--text);border-color:var(--muted-2);}
+  .table-toolbar .count{margin-left:auto;color:var(--muted-2);}
+
+  .data-table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .data-table thead th{text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);padding:8px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);}
+  .data-table tbody td{padding:8px;border-bottom:1px solid var(--border);color:var(--text);}
+  .data-table tbody tr.excluded td{color:var(--muted-2);text-decoration:line-through;text-decoration-color:var(--muted-2);}
+  .data-table tbody tr.out-of-range td{opacity:0.45;}
+  .data-table tbody tr.user-added td:nth-child(2)::after{content:" •";color:var(--m);}
+  .data-table .sz-cell{display:inline-flex;align-items:center;gap:6px;}
+  .data-table .sz-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .data-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .data-table .del-btn{background:transparent;border:none;color:var(--muted-2);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
+  .data-table .del-btn:hover{color:var(--l);}
+  .data-table input[type="checkbox"]{accent-color:var(--m);cursor:pointer;}
+  .table-scroll{max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;}
+  .table-scroll::-webkit-scrollbar{width:8px;}
+  .table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .table-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted-2);}
+
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
 
@@ -121,9 +191,9 @@
 
   <header>
     <div>
-      <div class="eyebrow">Operacje — śledzenie zamówień</div>
-      <h1>Mapa czasów realizacji</h1>
-      <div class="sub">Każde kółko to zakończone zamówienie. Pozycja w poziomie i wielkość kółka pokazują czas realizacji w dniach, kolor — deklarowany rozmiar zamówienia.</div>
+      <div class="eyebrow">Operacje — śledzenie tasków</div>
+      <h1>Mapa czasów obsługi tasków</h1>
+      <div class="sub">Każde kółko to zakończony task. Pozycja w poziomie to data ukończenia, w pionie — czas obsługi w dniach, kolor — deklarowany rozmiar taska.</div>
     </div>
     <div class="period">
       Okres danych
@@ -131,35 +201,70 @@
     </div>
   </header>
 
+  <div class="guide">
+    <h4>Jak czytać dashboard</h4>
+    <div class="guide-items">
+      <div class="guide-item">
+        <div class="gtitle"><span class="gnum">01</span>Scatterplot tasków</div>
+        <div class="gtext">Każda kropka = jeden task. <b>Oś X</b> — data ukończenia, <b>oś Y</b> — czas obsługi w dniach. <b>Kolor</b> — rozmiar (S/M/L). Trzy poziome linie przerywane to percentyle <b>P50</b> (mediana), <b>P75</b> i <b>P95</b> — bursztynowa P95 to „najgorszy realistyczny" czas obsługi.</div>
+      </div>
+      <div class="guide-item">
+        <div class="gtitle"><span class="gnum">02</span>Rozkład per rozmiar</div>
+        <div class="gtext">Dla każdego rozmiaru: cienka linia od <b>min do max</b>, pudełko od <b>P25 do P75</b> (środkowe 50% tasków), gruba kreska to <b>mediana</b>. Półprzezroczyste kropki to pojedyncze taski. Po prawej <b>CV</b> = im niżej, tym przewidywalniejsza kategoria.</div>
+      </div>
+      <div class="guide-item">
+        <div class="gtitle"><span class="gnum">03</span>Filtry i edycja</div>
+        <div class="gtext">Zmień zakres dat <b>polami</b>, <b>suwakiem</b> lub <b>presetami</b>. W tabeli <b>odznacz wiersz</b>, żeby wyłączyć task z analizy — wszystkie wykresy i statystyki przeliczą się od razu. Możesz też <b>dodać własne taski</b> formularzem.</div>
+      </div>
+    </div>
+  </div>
+
   <div class="filterbar">
-    <span class="flabel">Filtr okresu</span>
-    <div class="field">
-      <span>Od</span>
-      <input type="date" id="dateFrom">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;">
+      <span class="flabel">Filtr okresu</span>
+      <div class="field">
+        <span>Od</span>
+        <input type="date" id="dateFrom">
+      </div>
+      <div class="field">
+        <span>Do</span>
+        <input type="date" id="dateTo">
+      </div>
+      <div class="presets" id="presets">
+        <button data-preset="all" class="active">Cały okres</button>
+        <button data-preset="2024">2024</button>
+        <button data-preset="2025">2025</button>
+        <button data-preset="last3">Ost. 3 mies.</button>
+        <button data-preset="last6">Ost. 6 mies.</button>
+        <button data-preset="last12">Ost. 12 mies.</button>
+      </div>
+      <span class="count" id="filterCount"></span>
     </div>
-    <div class="field">
-      <span>Do</span>
-      <input type="date" id="dateTo">
+    <div class="slider-row">
+      <span class="slabel">Suwak zakresu</span>
+      <div class="slider-wrap">
+        <div class="slider-track-wrap">
+          <div class="slider-track"></div>
+          <div class="slider-track-active" id="trackActive"></div>
+          <input type="range" class="slider-input" id="sliderFrom" min="0" max="100" value="0" step="1">
+          <input type="range" class="slider-input" id="sliderTo" min="0" max="100" value="100" step="1">
+        </div>
+        <div class="slider-labels">
+          <span id="sliderFromLabel">—</span>
+          <span id="sliderToLabel">—</span>
+        </div>
+      </div>
     </div>
-    <div class="presets" id="presets">
-      <button data-preset="all" class="active">Cały okres</button>
-      <button data-preset="2024">2024</button>
-      <button data-preset="2025">2025</button>
-      <button data-preset="last3">Ost. 3 mies.</button>
-      <button data-preset="last6">Ost. 6 mies.</button>
-      <button data-preset="last12">Ost. 12 mies.</button>
-    </div>
-    <span class="count" id="filterCount"></span>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="label">Zamówienia</div>
+      <div class="label">Taski</div>
       <div class="value" id="statCount">—</div>
       <div class="note">w analizowanym okresie</div>
     </div>
     <div class="stat">
-      <div class="label">Średni czas realizacji</div>
+      <div class="label">Średni czas obsługi</div>
       <div class="value" id="statAvg">—<span class="unit">dni</span></div>
       <div class="note">mediana: <span id="statMedian">—</span> dni</div>
     </div>
@@ -181,17 +286,17 @@
   </div>
 
   <div class="percbar">
-    <span class="plabel">Percentyle czasu realizacji</span>
+    <span class="plabel">Percentyle czasu obsługi</span>
     <div class="pitem"><span class="pswatch" style="background:#5d6678"></span><span class="pname">P50 · mediana</span><span class="pval" id="percP50">—<span>dni</span></span></div>
     <div class="pitem"><span class="pswatch" style="background:#9aa4b5"></span><span class="pname">P75</span><span class="pval" id="percP75">—<span>dni</span></span></div>
     <div class="pitem"><span class="pswatch" style="background:#e4b35a"></span><span class="pname">P95</span><span class="pval" id="percP95">—<span>dni</span></span></div>
-    <div class="phint">P95 to wartość, której nie przekracza 95% zamówień — pokazuje „najgorszy realistyczny" czas dostawy.</div>
+    <div class="phint">P95 to wartość, której nie przekracza 95% tasków — pokazuje „najgorszy realistyczny" czas obsługi.</div>
   </div>
 
   <div class="panel">
     <div class="panel-head">
-      <div class="panel-title">Czas realizacji × rozmiar zamówienia
-        <small>Oś X — data ukończenia · Oś Y — czas realizacji (dni) · linie przerywane — percentyle P50 / P75 / P95</small>
+      <div class="panel-title">Czas obsługi × rozmiar taska
+        <small>Oś X — data ukończenia · Oś Y — czas obsługi (dni) · linie przerywane — percentyle P50 / P75 / P95</small>
       </div>
       <div class="legend" id="legend">
         <button data-size="S" class="active"><span class="sw" style="background:var(--s)"></span>S</button>
@@ -208,7 +313,7 @@
     <span class="num">02</span>
     <span class="stitle">Rozkład i przewidywalność</span>
     <span class="rule"></span>
-    <span class="ssub">Jak zachowują się czasy realizacji w obrębie każdej kategorii rozmiaru oraz które zamówienia wykraczają poza P95.</span>
+    <span class="ssub">Jak zachowują się czasy obsługi w obrębie każdej kategorii rozmiaru oraz które taski wykraczają poza P95.</span>
   </div>
 
   <div class="analysis-grid">
@@ -218,19 +323,86 @@
 
     <div class="out-panel">
       <h3>Spotlight outlierów</h3>
-      <div class="sublead">Zamówienia przekraczające P95 dla aktualnego okresu</div>
+      <div class="sublead">Taski przekraczające P95 dla aktualnego okresu</div>
       <div id="outList"></div>
     </div>
   </div>
 
+  <div class="section-divider">
+    <span class="num">03</span>
+    <span class="stitle">Edycja danych źródłowych</span>
+    <span class="rule"></span>
+    <span class="ssub">Dodawaj nowe taski, odznaczaj wiersze żeby je tymczasowo wyłączyć z analizy. Wszystko propaguje się w czasie rzeczywistym do wykresu, percentyli i rozkładu.</span>
+  </div>
+
+  <div class="data-grid">
+    <div class="add-panel">
+      <h3>Dodaj task</h3>
+      <div class="sublead">Wprowadź datę ukończenia, rozmiar i czas obsługi w dniach.</div>
+      <form class="add-form" id="addForm">
+        <div class="row">
+          <div class="field">
+            <span>Data ukończenia</span>
+            <input type="date" id="newDate" required>
+          </div>
+          <div class="field">
+            <span>Czas obsługi (dni)</span>
+            <input type="number" id="newLeadtime" min="1" max="2000" step="1" placeholder="np. 95" required>
+          </div>
+        </div>
+        <div class="field">
+          <span>Rozmiar</span>
+          <div class="size-pick">
+            <input type="radio" id="sz_S" name="newSize" value="S" required><label for="sz_S">S — mały</label>
+            <input type="radio" id="sz_M" name="newSize" value="M"><label for="sz_M">M — średni</label>
+            <input type="radio" id="sz_L" name="newSize" value="L"><label for="sz_L">L — duży</label>
+          </div>
+        </div>
+        <div class="row" style="justify-content:flex-end;">
+          <button type="submit" class="submit">Dodaj task</button>
+        </div>
+        <div class="formerr" id="addFormErr"></div>
+        <div class="formhint">Dodane taski oznaczone są kropką w tabeli i można je usunąć indywidualnie.</div>
+      </form>
+    </div>
+
+    <div class="table-panel">
+      <h3>Tabela źródłowa</h3>
+      <div class="sublead">Odznacz wiersz, aby wyłączyć go z wszystkich analiz. Pokazane są wszystkie taski — także te poza zakresem filtra (przygaszone).</div>
+      <div class="table-toolbar">
+        <button id="includeAll">Włącz wszystkie</button>
+        <button id="excludeOutside">Wyłącz spoza zakresu</button>
+        <span class="count" id="tableCount"></span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:32px;"></th>
+              <th>Data ukończenia</th>
+              <th>Rozmiar</th>
+              <th class="num">Czas (dni)</th>
+              <th style="width:30px;"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    <b>Źródło:</b> Lead_Times_202425.xlsx · <b>n</b> = 36 zamówień · Kolor kółka oznacza deklarowany rozmiar zamówienia (S / M / L).
+    <b>Źródło:</b> Lead_Times_202425.xlsx · <b>n</b> = 36 tasków · Kolor kółka oznacza deklarowany rozmiar taska (S / M / L).
   </footer>
 
 </div>
 
 <script>
 const records = [{"date": "2024-07-15", "size": "S", "leadtime": 49}, {"date": "2024-08-22", "size": "S", "leadtime": 48}, {"date": "2024-09-10", "size": "S", "leadtime": 87}, {"date": "2024-09-25", "size": "M", "leadtime": 57}, {"date": "2024-10-05", "size": "M", "leadtime": 148}, {"date": "2024-10-14", "size": "S", "leadtime": 53}, {"date": "2024-10-28", "size": "S", "leadtime": 45}, {"date": "2024-11-18", "size": "M", "leadtime": 145}, {"date": "2024-12-04", "size": "L", "leadtime": 105}, {"date": "2025-01-08", "size": "S", "leadtime": 5}, {"date": "2025-01-20", "size": "L", "leadtime": 163}, {"date": "2025-02-14", "size": "S", "leadtime": 43}, {"date": "2025-02-26", "size": "M", "leadtime": 415}, {"date": "2025-03-15", "size": "L", "leadtime": 123}, {"date": "2025-04-10", "size": "M", "leadtime": 103}, {"date": "2025-05-05", "size": "L", "leadtime": 104}, {"date": "2025-06-12", "size": "L", "leadtime": 302}, {"date": "2025-06-25", "size": "L", "leadtime": 158}, {"date": "2025-07-02", "size": "L", "leadtime": 98}, {"date": "2025-07-11", "size": "S", "leadtime": 52}, {"date": "2025-07-18", "size": "M", "leadtime": 95}, {"date": "2025-07-29", "size": "S", "leadtime": 70}, {"date": "2025-08-03", "size": "M", "leadtime": 95}, {"date": "2025-08-14", "size": "M", "leadtime": 101}, {"date": "2025-08-21", "size": "M", "leadtime": 57}, {"date": "2025-08-29", "size": "M", "leadtime": 57}, {"date": "2025-09-08", "size": "S", "leadtime": 53}, {"date": "2025-09-22", "size": "L", "leadtime": 137}, {"date": "2025-10-04", "size": "S", "leadtime": 73}, {"date": "2025-10-12", "size": "M", "leadtime": 60}, {"date": "2025-10-19", "size": "S", "leadtime": 126}, {"date": "2025-10-27", "size": "M", "leadtime": 57}, {"date": "2025-11-05", "size": "L", "leadtime": 124}, {"date": "2025-11-15", "size": "M", "leadtime": 75}, {"date": "2025-11-25", "size": "M", "leadtime": 89}, {"date": "2025-12-10", "size": "S", "leadtime": 44}];
+
+// Assign stable IDs
+records.forEach((r, i) => { r.id = 'r' + i; r.source = 'data'; });
+let userIdCounter = 0;
 
 const COLORS = { S:'#4fd1c5', M:'#f2a65a', L:'#e4607a' };
 const SIZE_LABEL = { S:'Mały', M:'Średni', L:'Duży' };
@@ -256,27 +428,29 @@ function percentile(arr, p){
   return s[lo] + (s[hi] - s[lo]) * (rank - lo);
 }
 
-// Date range from data
-const allDates = records.map(r => new Date(r.date));
-const dataMin = new Date(Math.min(...allDates));
-const dataMax = new Date(Math.max(...allDates));
+// Date range from data (mutable — recomputed via rebuildSliderBounds)
+let dataMin, dataMax;
 const toISO = d => d.toISOString().slice(0,10);
 
 const fromInput = document.getElementById('dateFrom');
 const toInput = document.getElementById('dateTo');
-fromInput.min = toInput.min = toISO(dataMin);
-fromInput.max = toInput.max = toISO(dataMax);
-fromInput.value = toISO(dataMin);
-toInput.value = toISO(dataMax);
 
 // State
 const hiddenSizes = new Set();
+const excludedIds = new Set();
 let currentPercentiles = { p50: 0, p75: 0, p95: 0 };
+
+// Recompute date bounds from records (so adding new ones extends the range)
+function recomputeBounds(){
+  const all = records.map(r => new Date(r.date));
+  return { min: new Date(Math.min(...all)), max: new Date(Math.max(...all)) };
+}
 
 function filteredRecords(){
   const from = new Date(fromInput.value + 'T00:00:00').getTime();
   const to = new Date(toInput.value + 'T23:59:59').getTime();
   return records.filter(r => {
+    if (excludedIds.has(r.id)) return false;
     const t = new Date(r.date).getTime();
     return t >= from && t <= to;
   });
@@ -316,14 +490,14 @@ function updateStats(source){
     const vals = source.filter(r=>r.size===sz).map(r=>r.leadtime);
     if (!vals.length){
       document.getElementById('stat'+sz).innerHTML = '—<span class="unit">dni śr.</span>';
-      document.getElementById('stat'+sz+'Note').textContent = 'brak zamówień w okresie';
+      document.getElementById('stat'+sz+'Note').textContent = 'brak tasków w okresie';
       return;
     }
     const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
     document.getElementById('stat'+sz).innerHTML = avg.toFixed(0) + '<span class="unit">dni śr.</span>';
-    document.getElementById('stat'+sz+'Note').textContent = vals.length + ' zam. · zakres ' + Math.min(...vals) + '–' + Math.max(...vals);
+    document.getElementById('stat'+sz+'Note').textContent = vals.length + ' tasków · zakres ' + Math.min(...vals) + '–' + Math.max(...vals);
   });
-  document.getElementById('filterCount').textContent = source.length + ' z ' + records.length + ' zamówień';
+  document.getElementById('filterCount').textContent = source.length + ' z ' + records.length + ' tasków';
 }
 
 const PERCENTILE_LINES = [
@@ -398,7 +572,7 @@ const chart = new Chart(ctx, {
         ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:11} }
       },
       y: {
-        title: { display: true, text: 'Czas realizacji (dni)', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:12} },
+        title: { display: true, text: 'Czas obsługi (dni)', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:12} },
         min: 0,
         grid: { color: '#222837' },
         ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:11} }
@@ -424,7 +598,7 @@ const chart = new Chart(ctx, {
             const r = item.raw._raw;
             const d = new Date(r.date);
             return [
-              'Czas realizacji: ' + r.leadtime + ' dni',
+              'Czas obsługi: ' + r.leadtime + ' dni',
               'Data ukończenia: ' + d.toLocaleDateString('pl-PL')
             ];
           }
@@ -446,7 +620,7 @@ function renderDistribution(source){
     if (!vals.length){
       return `<div class="dist-row">
         <div class="dist-label"><span class="dotbig" style="background:${COLORS[sz]}"></span>${sz}</div>
-        <div style="color:var(--muted-2);font-size:11.5px;font-family:'IBM Plex Mono',monospace;">brak zamówień w okresie</div>
+        <div style="color:var(--muted-2);font-size:11.5px;font-family:'IBM Plex Mono',monospace;">brak tasków w okresie</div>
         <div></div>
       </div>`;
     }
@@ -480,7 +654,7 @@ function renderDistribution(source){
         </div>
       </div>
       <div class="dist-meta">
-        <b>${vals.length}</b> zam. · zakres <b>${min}–${max}</b><br>
+        <b>${vals.length}</b> tasków · zakres <b>${min}–${max}</b><br>
         IQR <b>${p25.toFixed(0)}–${p75.toFixed(0)}</b> · mediana <b>${p50.toFixed(0)}</b><br>
         przewidywalność: <b>${consistencyLabel}</b> <span style="opacity:.6">(CV ${(cv*100).toFixed(0)}%)</span>
       </div>
@@ -492,7 +666,7 @@ function renderOutliers(source){
   const list = document.getElementById('outList');
   const lts = source.map(r=>r.leadtime);
   if (!lts.length){
-    list.innerHTML = '<div class="out-empty">Brak zamówień w wybranym okresie.</div>';
+    list.innerHTML = '<div class="out-empty">Brak tasków w wybranym okresie.</div>';
     return;
   }
   const p95 = percentile(lts, 95);
@@ -502,7 +676,7 @@ function renderOutliers(source){
     .sort((a,b) => b.leadtime - a.leadtime);
 
   if (!outliers.length){
-    list.innerHTML = '<div class="out-empty">Żadne zamówienie nie przekracza P95 w tym okresie.</div>';
+    list.innerHTML = '<div class="out-empty">Żaden task nie przekracza P95 w tym okresie.</div>';
     return;
   }
 
@@ -520,6 +694,151 @@ function renderOutliers(source){
     </div>`;
   }).join('');
 }
+
+// ---------- Data table ----------
+function renderTable(){
+  const tbody = document.getElementById('tableBody');
+  const from = new Date(fromInput.value + 'T00:00:00').getTime();
+  const to = new Date(toInput.value + 'T23:59:59').getTime();
+
+  // Sort: newest first
+  const sorted = [...records].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  tbody.innerHTML = sorted.map(r => {
+    const t = new Date(r.date).getTime();
+    const inRange = t >= from && t <= to;
+    const excluded = excludedIds.has(r.id);
+    const classes = [];
+    if (excluded) classes.push('excluded');
+    if (!inRange) classes.push('out-of-range');
+    if (r.source === 'user') classes.push('user-added');
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+    const delBtn = r.source === 'user'
+      ? `<button class="del-btn" data-del-id="${r.id}" title="Usuń">×</button>`
+      : '';
+    return `<tr class="${classes.join(' ')}" data-id="${r.id}">
+      <td><input type="checkbox" data-id="${r.id}" ${excluded ? '' : 'checked'}></td>
+      <td>${dateStr}</td>
+      <td><span class="sz-cell"><span class="sz-dot" style="background:${COLORS[r.size]}"></span>${r.size}</span></td>
+      <td class="num">${r.leadtime}</td>
+      <td>${delBtn}</td>
+    </tr>`;
+  }).join('');
+
+  const active = records.filter(r => !excludedIds.has(r.id)).length;
+  document.getElementById('tableCount').textContent = active + ' aktywnych tasków z ' + records.length;
+
+  // Wire up
+  tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.id;
+      if (cb.checked) excludedIds.delete(id);
+      else excludedIds.add(id);
+      applyFilter();
+    });
+  });
+  tbody.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.delId;
+      const idx = records.findIndex(r => r.id === id);
+      if (idx >= 0){
+        records.splice(idx, 1);
+        excludedIds.delete(id);
+        rebuildSliderBounds();
+        applyFilter();
+      }
+    });
+  });
+}
+
+// ---------- Dual range slider ----------
+const sliderFrom = document.getElementById('sliderFrom');
+const sliderTo   = document.getElementById('sliderTo');
+const sliderFromLabel = document.getElementById('sliderFromLabel');
+const sliderToLabel   = document.getElementById('sliderToLabel');
+const trackActive = document.getElementById('trackActive');
+
+let sliderMinTs = 0, sliderMaxTs = 0;
+
+function rebuildSliderBounds(){
+  const b = recomputeBounds();
+  dataMin = b.min; dataMax = b.max;
+  sliderMinTs = b.min.getTime();
+  sliderMaxTs = b.max.getTime();
+  fromInput.min = toInput.min = toISO(b.min);
+  fromInput.max = toInput.max = toISO(b.max);
+}
+
+function tsForSlider(pct){
+  return sliderMinTs + (pct / 100) * (sliderMaxTs - sliderMinTs);
+}
+function sliderForTs(ts){
+  if (sliderMaxTs === sliderMinTs) return 0;
+  return ((ts - sliderMinTs) / (sliderMaxTs - sliderMinTs)) * 100;
+}
+
+function syncSliderFromDates(){
+  const fromTs = new Date(fromInput.value).getTime();
+  const toTs = new Date(toInput.value).getTime();
+  sliderFrom.value = sliderForTs(fromTs);
+  sliderTo.value = sliderForTs(toTs);
+  updateSliderVisual();
+}
+
+function updateSliderVisual(){
+  let from = parseFloat(sliderFrom.value);
+  let to = parseFloat(sliderTo.value);
+  if (from > to) { [from, to] = [to, from]; }
+  trackActive.style.left = from + '%';
+  trackActive.style.width = (to - from) + '%';
+  const fmt = ts => new Date(ts).toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+  sliderFromLabel.textContent = fmt(tsForSlider(from));
+  sliderToLabel.textContent = fmt(tsForSlider(to));
+}
+
+function onSliderChange(){
+  let from = parseFloat(sliderFrom.value);
+  let to = parseFloat(sliderTo.value);
+  if (from > to) { [from, to] = [to, from]; sliderFrom.value = from; sliderTo.value = to; }
+  // Manage z-index so whichever thumb is at the upper edge is always grabbable
+  sliderFrom.style.zIndex = from > 50 ? 5 : 4;
+  sliderTo.style.zIndex   = to   < 50 ? 5 : 4;
+  fromInput.value = toISO(new Date(tsForSlider(from)));
+  toInput.value = toISO(new Date(tsForSlider(to)));
+  updateSliderVisual();
+  clearPresetActive();
+  applyFilter();
+}
+
+sliderFrom.addEventListener('input', onSliderChange);
+sliderTo.addEventListener('input', onSliderChange);
+
+// ---------- Add data ----------
+document.getElementById('addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const errEl = document.getElementById('addFormErr');
+  errEl.textContent = '';
+  const date = document.getElementById('newDate').value;
+  const leadtime = parseInt(document.getElementById('newLeadtime').value, 10);
+  const sizeEl = document.querySelector('input[name="newSize"]:checked');
+  if (!date) return errEl.textContent = 'Podaj datę ukończenia.';
+  if (!sizeEl) return errEl.textContent = 'Wybierz rozmiar (S/M/L).';
+  if (!Number.isFinite(leadtime) || leadtime < 1) return errEl.textContent = 'Podaj poprawny czas obsługi (≥ 1 dzień).';
+
+  const id = 'u' + (userIdCounter++);
+  records.push({ id, date, size: sizeEl.value, leadtime, source: 'user' });
+  document.getElementById('addForm').reset();
+  rebuildSliderBounds();
+  // If new record's date is outside current range, extend range to include it
+  const newTs = new Date(date).getTime();
+  const fromTs = new Date(fromInput.value).getTime();
+  const toTs = new Date(toInput.value).getTime();
+  if (newTs < fromTs) fromInput.value = date;
+  if (newTs > toTs) toInput.value = date;
+  syncSliderFromDates();
+  applyFilter();
+});
 
 function applyFilter(){
   // Guard: from must be <= to
@@ -540,8 +859,14 @@ function applyFilter(){
   updateStats(source);
   renderDistribution(source);
   renderOutliers(source);
+  renderTable();
+
+  // Rebuild chart datasets
   chart.data.datasets = ['S','M','L'].map(sz => buildDataset(sz, source));
   chart.update();
+
+  // Sync slider position to match dates
+  syncSliderFromDates();
 }
 
 fromInput.addEventListener('change', () => { clearPresetActive(); applyFilter(); });
@@ -574,22 +899,36 @@ document.querySelectorAll('#presets button').forEach(btn => {
   });
 });
 
-// Legend
-document.querySelectorAll('#legend button').forEach(btn=>{
+// Legend — size toggles
+document.querySelectorAll('#legend button[data-size]').forEach(btn=>{
   btn.addEventListener('click', () => {
     btn.classList.toggle('active');
     const sz = btn.dataset.size;
     if (btn.classList.contains('active')) hiddenSizes.delete(sz);
     else hiddenSizes.add(sz);
-    const idx = chart.data.datasets.findIndex(d => d.label === sz);
-    if (idx >= 0){
-      chart.data.datasets[idx].hidden = hiddenSizes.has(sz);
-      chart.update();
-    }
+    applyFilter();
   });
 });
 
-// Initial render
+// Bulk include/exclude buttons in table
+document.getElementById('includeAll').addEventListener('click', () => {
+  excludedIds.clear();
+  applyFilter();
+});
+document.getElementById('excludeOutside').addEventListener('click', () => {
+  const from = new Date(fromInput.value + 'T00:00:00').getTime();
+  const to = new Date(toInput.value + 'T23:59:59').getTime();
+  records.forEach(r => {
+    const t = new Date(r.date).getTime();
+    if (t < from || t > to) excludedIds.add(r.id);
+  });
+  applyFilter();
+});
+
+// ---------- Initialization ----------
+rebuildSliderBounds();
+fromInput.value = toISO(dataMin);
+toInput.value = toISO(dataMax);
 applyFilter();
 </script>
 
