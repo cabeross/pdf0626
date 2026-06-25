@@ -3041,16 +3041,25 @@ function renderMonteCarlo2(){
   }
 
   // ---- Gantt chart: per-epic min (P5→P5) and max (P95→P95) execution window ----
+  // Readability fix: use a relative "weeks since first Epic started" axis instead of
+  // absolute calendar dates — point zero = the earliest start across all Epics (P5).
+  document.getElementById('mc2GanttArea').style.height = Math.max(220, epics.length * 52 + 60) + 'px';
   const epicLabels = epics.map(e => e.name);
+  const startWeeksMin = epics.map((e, idx) => percentile(epicStarts[idx], 5));
+  const zeroSprint = Math.max(1, Math.min(...startWeeksMin)); // sprint index at week 0
+
+  function sprintToWeekOffset(s){ return (s - (zeroSprint - 1)) * 2; }
+  function weekOffsetToDate(w){ return mcAddWeeks(p.startDate, ((zeroSprint - 1) * 2) + w); }
+
   const ganttMin = epics.map((e, idx) => {
     const s = percentile(epicStarts[idx], 5);
     const en = percentile(epicEnds[idx], 5);
-    return [mcAddWeeks(p.startDate, (Math.max(0,s-1)) * 2).getTime(), mcAddWeeks(p.startDate, en * 2).getTime()];
+    return [sprintToWeekOffset(Math.max(1,s) - 1), sprintToWeekOffset(en)];
   });
   const ganttMax = epics.map((e, idx) => {
     const s = percentile(epicStarts[idx], 95);
     const en = percentile(epicEnds[idx], 95);
-    return [mcAddWeeks(p.startDate, (Math.max(0,s-1)) * 2).getTime(), mcAddWeeks(p.startDate, en * 2).getTime()];
+    return [sprintToWeekOffset(Math.max(1,s) - 1), sprintToWeekOffset(en)];
   });
 
   const ganttDatasets = [
@@ -3061,7 +3070,7 @@ function renderMonteCarlo2(){
       borderColor: '#4fd1c5',
       borderWidth: 1,
       borderSkipped: false,
-      barThickness: 14,
+      barThickness: 16,
     },
     {
       label: 'Max (pesymistyczny)',
@@ -3070,23 +3079,44 @@ function renderMonteCarlo2(){
       borderColor: '#e4607a',
       borderWidth: 1,
       borderSkipped: false,
-      barThickness: 14,
+      barThickness: 16,
     },
   ];
+
+  const ganttZeroLabelPlugin = {
+    id: 'ganttZeroLabel',
+    afterDraw(c){
+      const xScale = c.scales.x;
+      const ctx = c.ctx;
+      const zeroDate = weekOffsetToDate(0);
+      ctx.save();
+      ctx.fillStyle = '#5d6678';
+      ctx.font = '600 10px IBM Plex Mono';
+      ctx.textAlign = 'left';
+      ctx.fillText('Punkt 0 = ' + zeroDate.toLocaleDateString('pl-PL') + ' (start pierwszego Epiku)', xScale.left, c.chartArea.top - 8);
+      ctx.restore();
+    }
+  };
 
   if (!mc2GanttChart){
     mc2GanttChart = new Chart(document.getElementById('mc2Gantt').getContext('2d'), {
       type: 'bar',
       data: { labels: epicLabels, datasets: ganttDatasets },
+      plugins: [ganttZeroLabelPlugin],
       options: {
         indexAxis: 'y',
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 22 } },
         scales: {
           x: {
-            type: 'time',
-            time: { unit: 'week', tooltipFormat: 'dd.MM.yyyy', displayFormats: { week: 'dd.MM' } },
+            type: 'linear',
+            title: { display: true, text: 'Tygodnie od startu pierwszego Epiku', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:11} },
+            ticks: {
+              color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10},
+              callback: v => (v >= 0 ? '+' : '') + v + ' tyg.',
+              stepSize: 4,
+            },
             grid: { color: '#222837' },
-            ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
           },
           y: {
             stacked: false,
@@ -3103,7 +3133,9 @@ function renderMonteCarlo2(){
               title(items){ return items[0].label; },
               label(item){
                 const r = item.raw.x;
-                return item.dataset.label + ': ' + new Date(r[0]).toLocaleDateString('pl-PL') + ' → ' + new Date(r[1]).toLocaleDateString('pl-PL');
+                const d0 = weekOffsetToDate(r[0]);
+                const d1 = weekOffsetToDate(r[1]);
+                return item.dataset.label + ': ' + d0.toLocaleDateString('pl-PL') + ' → ' + d1.toLocaleDateString('pl-PL') + ' (tyg. ' + r[0] + '–' + r[1] + ')';
               }
             }
           }
@@ -3113,6 +3145,12 @@ function renderMonteCarlo2(){
   } else {
     mc2GanttChart.data.labels = epicLabels;
     mc2GanttChart.data.datasets = ganttDatasets;
+    mc2GanttChart.options.plugins.tooltip.callbacks.label = function(item){
+      const r = item.raw.x;
+      const d0 = weekOffsetToDate(r[0]);
+      const d1 = weekOffsetToDate(r[1]);
+      return item.dataset.label + ': ' + d0.toLocaleDateString('pl-PL') + ' → ' + d1.toLocaleDateString('pl-PL') + ' (tyg. ' + r[0] + '–' + r[1] + ')';
+    };
     mc2GanttChart.update();
   }
 }
