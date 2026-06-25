@@ -292,6 +292,11 @@
   .add-epic-btn{background:var(--panel-2);border:1px dashed var(--border);border-radius:8px;padding:9px 16px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;margin-top:10px;transition:all .15s ease;}
   .add-epic-btn:hover{color:var(--text);border-color:var(--m);}
 
+  .reorder-btns{display:flex;flex-direction:column;gap:2px;}
+  .reorder-btns button{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:10px;line-height:1;padding:2px 5px;cursor:pointer;}
+  .reorder-btns button:hover{color:var(--text);border-color:var(--m);}
+  .reorder-btns button:disabled{opacity:0.25;cursor:default;}
+
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
 
@@ -852,14 +857,14 @@
   <div class="tab-pane" data-tab="mc2">
   <div class="tab-desc">
     <div class="tdtitle">Jak czytać tę prognozę</div>
-    Druga symulacja Monte Carlo (5000 prób) — ale tu <b>niepewność dotyczy też samego rozmiaru pracy</b>, nie tylko tempa. Każdy Epik ma zakres estymacji (min–max historyjek); w każdej próbie losujemy rozmiar każdego Epiku z jego zakresu, sumujemy, i sprawdzamy ile okresów zajmie dostarczenie tej sumy przy danej przepustowości zespołu. <b>Dodawaj/usuwaj Epiki</b> w tabeli poniżej. Przepustowość możesz szacować w <b>sprintach (2 tyg.) lub miesięcznie</b> — wybierz jednostkę okresu i wpisz własne wartości historyczne. Każda zmienna jest edytowalna ręcznie.
+    Druga symulacja Monte Carlo (5000 prób) — niepewność dotyczy <b>rozmiaru pracy</b> (zakresy Epików), <b>tempa</b> (przepustowość historyczna × mnożnik miesięczny) i <b>kolejności/współbieżności</b> pracy (WIP). Epiki są realizowane w zdefiniowanej kolejności, z limitem ilu można robić naraz (WIP). Dodawaj/usuwaj/przesuwaj Epiki w tabeli, ustawiaj mnożnik przepustowości dla każdego miesiąca z osobna.
   </div>
 
   <div class="section-divider">
     <span class="num">07</span>
     <span class="stitle">Prognoza dostarczenia Epików — Monte Carlo</span>
     <span class="rule"></span>
-    <span class="ssub">6 Epików z zakresami estymacji, start lipiec 2026, cel koniec października 2026. Zespół poświęca na nie 75% czasu, z oczekiwanym wzrostem przepustowości od września.</span>
+    <span class="ssub">6 Epików z zakresami estymacji, start lipiec 2026, cel koniec października 2026. WIP i kolejność realizacji wpływają na to, kiedy każdy Epik się kończy.</span>
   </div>
 
   <div class="mc-panel">
@@ -874,13 +879,6 @@
         <input type="date" id="mc2TargetDate" value="2026-10-31">
       </div>
       <div class="mc-field">
-        <div class="mlabel">Jednostka okresu</div>
-        <select id="mc2PeriodUnit" style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;color-scheme:dark;">
-          <option value="sprint" selected>Sprint (2 tygodnie)</option>
-          <option value="month">Miesiąc</option>
-        </select>
-      </div>
-      <div class="mc-field" id="mc2ThroughputSprintField">
         <div class="mlabel">Przepustowość historyczna (sprinty, 2 tyg.)</div>
         <input type="text" id="mc2Throughput" value="3,4,5,4,2,7,4,5">
       </div>
@@ -894,41 +892,42 @@
       </div>
     </div>
 
-    <div id="mc2ThroughputMonthField" style="display:none;">
-      <div class="mc-section-label" style="margin-top:18px;">Przepustowość historyczna — miesięcznie<span class="ln"></span></div>
-      <div class="table-scroll" style="max-height:280px;">
-        <table class="data-table epic-table">
-          <thead>
-            <tr>
-              <th>Miesiąc</th>
-              <th class="num">Przepustowość (historyjek)</th>
-              <th style="width:30px;"></th>
-            </tr>
-          </thead>
-          <tbody id="monthlyTableBody"></tbody>
-        </table>
-      </div>
-      <button class="add-epic-btn" id="addMonthBtn">+ Dodaj miesiąc</button>
-      <div style="font-size:10px;color:var(--muted-2);margin-top:8px;">Wpisz realne dane z przeszłości — ile historyjek/miesiąc zespół faktycznie dostarczał. Każdy wiersz to jedna obserwacja w puli losowania.</div>
+    <div class="mc-section-label">Mnożnik przepustowości per miesiąc (np. urlopy, lepsza znajomość domeny)<span class="ln"></span></div>
+    <div class="table-scroll" style="max-height:260px;">
+      <table class="data-table epic-table">
+        <thead>
+          <tr>
+            <th>Miesiąc</th>
+            <th class="num">Mnożnik przepustowości</th>
+            <th style="width:30px;"></th>
+          </tr>
+        </thead>
+        <tbody id="monthMultTableBody"></tbody>
+      </table>
     </div>
+    <button class="add-epic-btn" id="addMonthMultBtn">+ Dodaj miesiąc</button>
+    <div class="mc-toggle" style="margin-top:10px;">
+      <input type="checkbox" id="mc2MultToggle" checked>
+      <label for="mc2MultToggle">Uwzględnij mnożniki miesięczne w prognozie</label>
+    </div>
+    <div style="font-size:10px;color:var(--muted-2);margin-top:4px;">100% = tempo bez zmian. Miesiące poza tabelą również liczone jako 100%. Sprint przypisywany do miesiąca swojej daty startu.</div>
 
-    <div class="mc-section-label">Czynnik — wzrost przepustowości od września (urlopy + znajomość domeny)<span class="ln"></span></div>
-    <div class="mc-controls">
-      <div class="mc-field" style="grid-column: span 2;">
-        <div class="mlabel">Wzrost przepustowości <span class="mval" id="mc2BoostVal">+20%</span></div>
-        <input type="range" id="mc2BoostPct" min="0" max="60" step="5" value="20">
-        <div class="mc-toggle">
-          <input type="checkbox" id="mc2BoostToggle" checked>
-          <label for="mc2BoostToggle">Uwzględnij w prognozie</label>
-        </div>
+    <div class="mc-section-label" style="margin-top:24px;">Epiki — zakresy, kolejność i WIP<span class="ln"></span></div>
+    <div class="mc-controls" style="grid-template-columns:200px 1fr;margin-bottom:14px;">
+      <div class="mc-field">
+        <div class="mlabel">WIP (Epików naraz)</div>
+        <input type="number" id="mc2Wip" value="1" min="1" max="6" step="1">
+      </div>
+      <div class="mc-field">
+        <div class="mlabel" style="margin-bottom:0;">&nbsp;</div>
+        <div style="font-size:10.5px;color:var(--muted-2);line-height:1.5;">WIP=1 → Epiki kończone po kolei. WIP=2+ → kilka Epików równocześnie „w toku"; gdy jeden się kończy, kolejny w kolejności startuje automatycznie.</div>
       </div>
     </div>
-
-    <div class="mc-section-label">Epiki (paczki wartości) — edytuj zakresy, dodawaj i usuwaj<span class="ln"></span></div>
     <div class="table-scroll" style="max-height:320px;">
       <table class="data-table epic-table">
         <thead>
           <tr>
+            <th style="width:54px;">Kolejność</th>
             <th>Nazwa</th>
             <th class="num">Estymacja min (historyjek)</th>
             <th class="num">Estymacja max (historyjek)</th>
@@ -948,6 +947,12 @@
 
     <div class="mc-chart-area">
       <canvas id="mc2Chart"></canvas>
+    </div>
+
+    <div class="mc-section-label" style="margin-top:24px;">Wykres Gantta — okres realizacji każdego Epiku (P5–P95)<span class="ln"></span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Jasny pasek = scenariusz <b>minimalny</b> (optymistyczny start → optymistyczny koniec). Ciemny pasek = scenariusz <b>maksymalny</b> (pesymistyczny start → pesymistyczny koniec). Realny przebieg będzie zwykle gdzieś pomiędzy.</div>
+    <div class="mc-chart-area" id="mc2GanttArea" style="height:280px;">
+      <canvas id="mc2Gantt"></canvas>
     </div>
   </div>
 
@@ -2283,6 +2288,18 @@ function renderWeeklyTable(){
 
 // ---------- Monte Carlo forecast (tab 06) ----------
 const MC_TRIALS = 5000;
+
+// Color convention for Monte Carlo charts: higher cumulative percentile = more positive
+// (greener) — reaching further into the distribution means more confidence/safety, not danger.
+const PCT_MARKER_COLORS = { p50: '#9aa4b5', p85: '#4fd1c5', p95: '#3ddc84' };
+function pctToPositiveColor(pct, alpha){
+  // Interpolate hue from neutral blue-gray (low pct) to green (high pct).
+  const t = Math.max(0, Math.min(1, pct / 100));
+  const hue = 230 - t * 90; // 230 (blue-gray) -> 140 (green)
+  const sat = 35 + t * 35;  // gets more saturated/positive as it goes
+  const light = 55;
+  return `hsla(${hue.toFixed(0)}, ${sat.toFixed(0)}%, ${light}%, ${alpha})`;
+}
 const MC_MAX_SPRINTS = 150; // safety cap (~5.7 years of 2-week sprints)
 
 function mcAddWeeks(dateStr, weeks){
@@ -2470,20 +2487,25 @@ function renderMonteCarlo(){
     ${impactRows}
   `;
 
-  // ---- Histogram of completion dates ----
+  // ---- Histogram of completion dates (gradient: higher cumulative percentile = more positive/green) ----
   const counts = {};
   sprintsNeededArr.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
   const sprintKeys = Object.keys(counts).map(Number).sort((a,b)=>a-b);
-  const histData = sprintKeys.map(s => ({
-    x: mcAddWeeks(p.startDate, s * 2).getTime(),
-    y: (counts[s] / MC_TRIALS) * 100,
-  }));
+  let cum06 = 0;
+  const histData = sprintKeys.map(s => {
+    cum06 += counts[s];
+    return {
+      x: mcAddWeeks(p.startDate, s * 2).getTime(),
+      y: (counts[s] / MC_TRIALS) * 100,
+      _cumPct: (cum06 / MC_TRIALS) * 100,
+    };
+  });
 
   const histDataset = {
     label: 'Trafienia (% prób)',
     data: histData,
-    backgroundColor: THROUGHPUT_COLOR + '99',
-    borderColor: THROUGHPUT_COLOR,
+    backgroundColor: histData.map(d => pctToPositiveColor(d._cumPct, 0.6)),
+    borderColor: histData.map(d => pctToPositiveColor(d._cumPct, 1)),
     borderWidth: 1,
   };
 
@@ -2493,9 +2515,9 @@ function renderMonteCarlo(){
       const xScale = c.scales.x, yScale = c.scales.y;
       const ctx = c.ctx;
       const markers = [
-        [dateP50.getTime(), '#9aa4b5', 'P50'],
-        [dateP85.getTime(), '#f2a65a', 'P85'],
-        [dateP95.getTime(), '#e4607a', 'P95'],
+        [dateP50.getTime(), PCT_MARKER_COLORS.p50, 'P50'],
+        [dateP85.getTime(), PCT_MARKER_COLORS.p85, 'P85'],
+        [dateP95.getTime(), PCT_MARKER_COLORS.p95, 'P95'],
       ];
       ctx.save();
       markers.forEach(([ts, color, label]) => {
@@ -2578,6 +2600,7 @@ function mcScheduleRender(){
 });
 
 // ---------- Monte Carlo forecast #2 — Epics with size uncertainty (tab 07) ----------
+// ---------- Monte Carlo forecast #2 — Epics with size uncertainty, order & WIP (tab 07) ----------
 let epicIdCounter = 6;
 const epics = [
   { id: 'e1', name: 'Epik 1', min: 4, max: 6 },
@@ -2591,8 +2614,14 @@ const epics = [
 function renderEpicsTable(){
   const tbody = document.getElementById('epicsTableBody');
   if (!tbody) return;
-  tbody.innerHTML = epics.map(e => `
+  tbody.innerHTML = epics.map((e, idx) => `
     <tr data-id="${e.id}">
+      <td>
+        <div class="reorder-btns">
+          <button data-move="up" data-id="${e.id}" ${idx === 0 ? 'disabled' : ''} title="Przesuń wyżej">▲</button>
+          <button data-move="down" data-id="${e.id}" ${idx === epics.length - 1 ? 'disabled' : ''} title="Przesuń niżej">▼</button>
+        </div>
+      </td>
       <td><input type="text" value="${e.name}" data-field="name" data-id="${e.id}"></td>
       <td class="num"><input type="number" value="${e.min}" min="0" max="999" step="1" data-field="min" data-id="${e.id}"></td>
       <td class="num"><input type="number" value="${e.max}" min="0" max="999" step="1" data-field="max" data-id="${e.id}"></td>
@@ -2619,6 +2648,18 @@ function renderEpicsTable(){
       }
     });
   });
+  tbody.querySelectorAll('[data-move]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = epics.findIndex(x => x.id === btn.dataset.id);
+      if (idx < 0) return;
+      const dir = btn.dataset.move === 'up' ? -1 : 1;
+      const swapIdx = idx + dir;
+      if (swapIdx < 0 || swapIdx >= epics.length) return;
+      [epics[idx], epics[swapIdx]] = [epics[swapIdx], epics[idx]];
+      renderEpicsTable();
+      mc2ScheduleRender();
+    });
+  });
 }
 
 document.getElementById('addEpicBtn').addEventListener('click', () => {
@@ -2628,171 +2669,217 @@ document.getElementById('addEpicBtn').addEventListener('click', () => {
   mc2ScheduleRender();
 });
 
-// Monthly throughput table (used when periodUnit === 'month') — editable rows of {label, value}
-let monthRowIdCounter = 4;
-const monthlyRows = [
-  { id: 'mo1', label: 'Marzec 2026', value: 8 },
-  { id: 'mo2', label: 'Kwiecień 2026', value: 9 },
-  { id: 'mo3', label: 'Maj 2026', value: 7 },
-  { id: 'mo4', label: 'Czerwiec 2026', value: 10 },
+// Monthly throughput multipliers — e.g. vacations (lower) or better domain knowledge (higher).
+// Applies to EVERY month individually (not just a single "from September" cutoff).
+let monthMultIdCounter = 4;
+const monthMultRows = [
+  { id: 'mm1', label: 'Lipiec 2026',     pct: 100 },
+  { id: 'mm2', label: 'Sierpień 2026',   pct: 100 },
+  { id: 'mm3', label: 'Wrzesień 2026',   pct: 120 },
+  { id: 'mm4', label: 'Październik 2026', pct: 130 },
 ];
 
-function renderMonthlyTable(){
-  const tbody = document.getElementById('monthlyTableBody');
+function renderMonthMultTable(){
+  const tbody = document.getElementById('monthMultTableBody');
   if (!tbody) return;
-  tbody.innerHTML = monthlyRows.map(m => `
+  tbody.innerHTML = monthMultRows.map(m => `
     <tr data-id="${m.id}">
       <td><input type="text" value="${m.label}" data-field="label" data-id="${m.id}"></td>
-      <td class="num"><input type="number" value="${m.value}" min="0" max="999" step="1" data-field="value" data-id="${m.id}"></td>
+      <td class="num"><input type="number" value="${m.pct}" min="0" max="300" step="5" data-field="pct" data-id="${m.id}">%</td>
       <td><button class="del-btn" data-del-month="${m.id}" title="Usuń">×</button></td>
     </tr>
   `).join('');
 
   tbody.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', () => {
-      const m = monthlyRows.find(x => x.id === inp.dataset.id);
+      const m = monthMultRows.find(x => x.id === inp.dataset.id);
       if (!m) return;
       if (inp.dataset.field === 'label') m.label = inp.value;
-      else m.value = parseFloat(inp.value) || 0;
+      else m.pct = parseFloat(inp.value) || 0;
       mc2ScheduleRender();
     });
   });
   tbody.querySelectorAll('[data-del-month]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = monthlyRows.findIndex(x => x.id === btn.dataset.delMonth);
+      const idx = monthMultRows.findIndex(x => x.id === btn.dataset.delMonth);
       if (idx >= 0){
-        monthlyRows.splice(idx, 1);
-        renderMonthlyTable();
+        monthMultRows.splice(idx, 1);
+        renderMonthMultTable();
         mc2ScheduleRender();
       }
     });
   });
 }
 
-document.getElementById('addMonthBtn').addEventListener('click', () => {
-  monthRowIdCounter++;
-  monthlyRows.push({ id: 'mo' + monthRowIdCounter, label: 'Miesiąc ' + monthRowIdCounter, value: 8 });
-  renderMonthlyTable();
+document.getElementById('addMonthMultBtn').addEventListener('click', () => {
+  monthMultIdCounter++;
+  monthMultRows.push({ id: 'mm' + monthMultIdCounter, label: 'Miesiąc ' + monthMultIdCounter, pct: 100 });
+  renderMonthMultTable();
   mc2ScheduleRender();
 });
 
-function mc2AddPeriod(dateStr, n, unit){
-  if (unit === 'month'){
-    const d = new Date(dateStr + 'T00:00:00');
-    d.setMonth(d.getMonth() + n);
-    return d;
+// Parses a Polish "Miesiąc Rok" label into a 'YYYY-MM' key for lookup. Falls back gracefully
+// if the label doesn't parse — unmatched months simply default to a 100% multiplier.
+const PL_MONTHS = ['stycz','lut','marz','kwiet','maj','czerw','lip','sierp','wrz','październ','listopad','grudz'];
+function mc2ParseMonthLabel(label){
+  const m = label.toLowerCase();
+  const yearMatch = m.match(/(20\d{2})/);
+  if (!yearMatch) return null;
+  const year = yearMatch[1];
+  for (let i = 0; i < PL_MONTHS.length; i++){
+    if (m.includes(PL_MONTHS[i])) return year + '-' + String(i+1).padStart(2,'0');
   }
-  return mcAddWeeks(dateStr, n * 2);
+  return null;
 }
 
 function mc2ReadParams(){
-  const periodUnit = document.getElementById('mc2PeriodUnit').value; // 'sprint' | 'month'
-  let throughputHistory;
-  if (periodUnit === 'month'){
-    throughputHistory = monthlyRows.map(m => m.value).filter(v => !isNaN(v) && v >= 0);
-  } else {
-    throughputHistory = document.getElementById('mc2Throughput').value
-      .split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v) && v >= 0);
-  }
+  const throughputHistory = document.getElementById('mc2Throughput').value
+    .split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v) && v >= 0);
+
+  const monthMultMap = {};
+  monthMultRows.forEach(m => {
+    const key = mc2ParseMonthLabel(m.label);
+    if (key) monthMultMap[key] = m.pct / 100;
+  });
+
   return {
-    periodUnit,
     startDate: document.getElementById('mc2StartDate').value,
     targetDate: document.getElementById('mc2TargetDate').value,
     throughputHistory: throughputHistory.length ? throughputHistory : [1],
     capacityPct: parseFloat(document.getElementById('mc2CapacityPct').value) || 100,
     includeCapacity: document.getElementById('mc2CapacityToggle').checked,
-    boostPct: parseFloat(document.getElementById('mc2BoostPct').value) || 0,
-    includeBoost: document.getElementById('mc2BoostToggle').checked,
+    monthMultMap,
+    includeMonthMult: document.getElementById('mc2MultToggle').checked,
+    wip: Math.max(1, parseInt(document.getElementById('mc2Wip').value, 10) || 1),
   };
 }
 
-function mc2SampleBacklog(){
-  // Each Epic's size is uncertain — draw uniformly from its [min,max] range, sum across all Epics.
-  return epics.reduce((sum, e) => {
-    const lo = Math.min(e.min, e.max), hi = Math.max(e.min, e.max);
-    const draw = lo + Math.random() * (hi - lo);
-    return sum + Math.round(draw);
-  }, 0);
+function mc2MonthKey(dateObj){
+  return dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0');
 }
 
+// Per-trial simulation: epics are worked in array order, with up to `wip` epics "active"
+// (in progress) at once. Each sprint's throughput is greedily allocated to active epics in
+// order — when one finishes mid-sprint, leftover capacity rolls into the next active epic,
+// and a new epic activates to refill the WIP slot for the following sprint.
 function mc2Simulate(p, overrides){
-  const includeCapacity = overrides && 'includeCapacity' in overrides ? overrides.includeCapacity : p.includeCapacity;
-  const includeBoost    = overrides && 'includeBoost'    in overrides ? overrides.includeBoost    : p.includeBoost;
+  const includeCapacity  = overrides && 'includeCapacity'  in overrides ? overrides.includeCapacity  : p.includeCapacity;
+  const includeMonthMult = overrides && 'includeMonthMult' in overrides ? overrides.includeMonthMult : p.includeMonthMult;
 
-  const startDateObj = new Date(p.startDate + 'T00:00:00');
   const targetDateObj = new Date(p.targetDate + 'T00:00:00');
-  const year = startDateObj.getFullYear();
-  const sept1 = new Date(year + '-09-01T00:00:00');
-
   const capacityMult = includeCapacity ? (p.capacityPct / 100) : 1;
-  const boostMult = includeBoost ? (1 + p.boostPct / 100) : 1;
   const hist = p.throughputHistory;
+  const wip = p.wip;
+  const n = epics.length;
 
   const sprintsNeededArr = [];
   const itemsAtTargetArr = [];
   const backlogSamples = [];
+  const epicStarts = epics.map(() => []);
+  const epicEnds   = epics.map(() => []);
 
   for (let trial = 0; trial < MC_TRIALS; trial++){
-    const backlog = mc2SampleBacklog();
-    backlogSamples.push(backlog);
+    const sizes = epics.map(e => {
+      const lo = Math.min(e.min, e.max), hi = Math.max(e.min, e.max);
+      return Math.round(lo + Math.random() * (hi - lo));
+    });
+    const totalBacklog = sizes.reduce((a,b) => a + b, 0);
+    backlogSamples.push(totalBacklog);
 
-    let cumulative = 0;
+    const remaining = sizes.slice();
+    const started = new Array(n).fill(false);
+    const startSprint = new Array(n).fill(null);
+    const endSprint = new Array(n).fill(null);
+
+    // Active queue holds epic indices currently in progress, in priority order.
+    let active = [];
+    let nextToStart = 0;
+    while (active.length < wip && nextToStart < n){
+      active.push(nextToStart);
+      started[nextToStart] = true;
+      nextToStart++;
+    }
+
+    let cumulativeDone = 0;
     let sprintsNeeded = null;
     let itemsAtTarget = 0;
     let targetLocked = false;
+    let s = 0;
 
-    for (let s = 1; s <= MC_MAX_SPRINTS; s++){
+    while (active.length > 0 && s < MC_MAX_SPRINTS){
+      s++;
       const sample = hist[Math.floor(Math.random() * hist.length)];
-      const sprintStart = mc2AddPeriod(p.startDate, s - 1, p.periodUnit);
-      const sprintEnd = mc2AddPeriod(p.startDate, s, p.periodUnit);
+      const sprintStart = mcAddWeeks(p.startDate, (s - 1) * 2);
+      const sprintEnd = mcAddWeeks(p.startDate, s * 2);
 
       let mult = capacityMult;
-      if (sprintStart >= sept1) mult *= boostMult;
+      if (includeMonthMult){
+        const key = mc2MonthKey(sprintStart);
+        if (key in p.monthMultMap) mult *= p.monthMultMap[key];
+      }
 
-      const eff = Math.max(0, Math.round(sample * mult));
-      cumulative += eff;
+      let budget = Math.max(0, Math.round(sample * mult));
 
-      if (!targetLocked){
-        if (sprintEnd <= targetDateObj){
-          itemsAtTarget = Math.min(cumulative, backlog);
+      active.forEach(idx => { if (startSprint[idx] === null) startSprint[idx] = s; });
+
+      let i = 0;
+      while (budget > 0 && i < active.length){
+        const idx = active[i];
+        const take = Math.min(budget, remaining[idx]);
+        remaining[idx] -= take;
+        budget -= take;
+        if (remaining[idx] <= 0){
+          endSprint[idx] = s;
+          active.splice(i, 1);
+          if (nextToStart < n){
+            active.splice(i, 0, nextToStart);
+            started[nextToStart] = true;
+            startSprint[nextToStart] = s; // activates same sprint it opens a slot
+            nextToStart++;
+          }
+          // don't advance i — a freshly activated epic sits at the same slot
         } else {
-          targetLocked = true;
+          i++;
         }
       }
 
-      if (sprintsNeeded === null && cumulative >= backlog){
-        sprintsNeeded = s;
-        if (targetLocked) break;
+      cumulativeDone = sizes.reduce((sum, sz, idx) => sum + (sz - remaining[idx]), 0);
+
+      if (!targetLocked){
+        if (sprintEnd <= targetDateObj) itemsAtTarget = Math.min(cumulativeDone, totalBacklog);
+        else targetLocked = true;
       }
-      if (sprintsNeeded !== null && targetLocked) break;
+      if (sprintsNeeded === null && active.length === 0) sprintsNeeded = s;
     }
 
     sprintsNeededArr.push(sprintsNeeded === null ? MC_MAX_SPRINTS : sprintsNeeded);
     itemsAtTargetArr.push(itemsAtTarget);
+    for (let idx = 0; idx < n; idx++){
+      epicStarts[idx].push(startSprint[idx] === null ? MC_MAX_SPRINTS : startSprint[idx]);
+      epicEnds[idx].push(endSprint[idx] === null ? MC_MAX_SPRINTS : endSprint[idx]);
+    }
   }
 
-  return { sprintsNeededArr, itemsAtTargetArr, backlogSamples };
+  return { sprintsNeededArr, itemsAtTargetArr, backlogSamples, epicStarts, epicEnds };
 }
 
 let mc2Chart = null;
+let mc2GanttChart = null;
 
 function renderMonteCarlo2(){
   const p = mc2ReadParams();
-
   document.getElementById('mc2CapacityVal').textContent = p.capacityPct + '%';
-  document.getElementById('mc2BoostVal').textContent = '+' + p.boostPct + '%';
 
   const result = mc2Simulate(p);
-  const { sprintsNeededArr, itemsAtTargetArr, backlogSamples } = result;
+  const { sprintsNeededArr, itemsAtTargetArr, backlogSamples, epicStarts, epicEnds } = result;
   const backlogP50 = percentile(backlogSamples, 50);
 
   const p50sprints = percentile(sprintsNeededArr, 50);
   const p85sprints = percentile(sprintsNeededArr, 85);
   const p95sprints = percentile(sprintsNeededArr, 95);
-  const dateP50 = mc2AddPeriod(p.startDate, Math.ceil(p50sprints), p.periodUnit);
-  const dateP85 = mc2AddPeriod(p.startDate, Math.ceil(p85sprints), p.periodUnit);
-  const dateP95 = mc2AddPeriod(p.startDate, Math.ceil(p95sprints), p.periodUnit);
-  const unitLabel = p.periodUnit === 'month' ? 'miesięcy' : 'sprintów';
+  const dateP50 = mcAddWeeks(p.startDate, Math.ceil(p50sprints) * 2);
+  const dateP85 = mcAddWeeks(p.startDate, Math.ceil(p85sprints) * 2);
+  const dateP95 = mcAddWeeks(p.startDate, Math.ceil(p95sprints) * 2);
 
   const itemsP50 = percentile(itemsAtTargetArr, 50);
   const itemsP95 = percentile(itemsAtTargetArr, 5);
@@ -2802,7 +2889,7 @@ function renderMonteCarlo2(){
     <div class="mc-stat p50">
       <div class="lbl">Data ukończenia · P50</div>
       <div class="val">${mcFormatDate(dateP50)}</div>
-      <div class="sub">typowy scenariusz (~${Math.ceil(p50sprints)} ${unitLabel})</div>
+      <div class="sub">typowy scenariusz (~${Math.ceil(p50sprints)} sprintów)</div>
     </div>
     <div class="mc-stat p85">
       <div class="lbl">Data ukończenia · P85</div>
@@ -2823,24 +2910,24 @@ function renderMonteCarlo2(){
 
   document.getElementById('mc2Interpretation').innerHTML = `
     <div class="tdtitle">Co to znaczy w praktyce</div>
-    Sam rozmiar pracy jest niepewny — mediana wylosowanych sum z zakresów Epików to <b>${backlogP50.toFixed(0)} historyjek</b>, ale w pojedynczych próbach bywa inaczej. Z <b>85% pewnością</b> wszystkie Epiki będą dostarczone do <b>${mcFormatDate(dateP85)}</b> — to bezpieczna data do komunikowania na zewnątrz. Typowo (P50) skończycie ok. <b>${mcFormatDate(dateP50)}</b>, ale to ryzykowna obietnica — połowa symulacji wypada później.<br><br>
-    Do <b>${new Date(p.targetDate+'T00:00:00').toLocaleDateString('pl-PL')}</b> z 85% pewnością zrobicie <b>co najmniej ${itemsP85b.toFixed(0)}</b> historyjek (typowo ok. ${itemsP50.toFixed(0)}). Jeśli rozszerzasz lub usuwasz Epik w tabeli powyżej, te liczby przeliczą się automatycznie.
+    Sam rozmiar pracy jest niepewny — mediana wylosowanych sum z zakresów Epików to <b>${backlogP50.toFixed(0)} historyjek</b>. Przy WIP=${p.wip} i obecnej kolejności, z <b>85% pewnością</b> wszystkie Epiki będą dostarczone do <b>${mcFormatDate(dateP85)}</b>. Typowo (P50) skończycie ok. <b>${mcFormatDate(dateP50)}</b>, ale to ryzykowna obietnica — połowa symulacji wypada później.<br><br>
+    Do <b>${new Date(p.targetDate+'T00:00:00').toLocaleDateString('pl-PL')}</b> z 85% pewnością zrobicie <b>co najmniej ${itemsP85b.toFixed(0)}</b> historyjek (typowo ok. ${itemsP50.toFixed(0)}). Zmiana kolejności Epików lub WIP-u przesunie to, które konkretnie Epiki zdążą się skończyć, nawet jeśli łączna data się nie zmieni.
   `;
 
   // ---- Impact breakdown ----
-  const baseline = mc2Simulate(p, { includeCapacity:false, includeBoost:false });
-  const withCapacity = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeBoost:false });
-  const withAll = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeBoost: p.includeBoost });
+  const baseline = mc2Simulate(p, { includeCapacity:false, includeMonthMult:false });
+  const withCapacity = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeMonthMult:false });
+  const withAll = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeMonthMult: p.includeMonthMult });
 
   const stepsDef = [
-    { label: 'Bez ograniczeń (100% czasu, brak wzrostu)', arr: baseline.sprintsNeededArr },
+    { label: 'Bez ograniczeń (100% czasu, bez mnożników)', arr: baseline.sprintsNeededArr },
     { label: '% czasu zespołu na Epikach' + (p.includeCapacity ? '' : ' — wyłączone'), arr: withCapacity.sprintsNeededArr },
-    { label: 'Wzrost przepustowości od września' + (p.includeBoost ? '' : ' — wyłączone'), arr: withAll.sprintsNeededArr },
+    { label: 'Mnożniki przepustowości per miesiąc' + (p.includeMonthMult ? '' : ' — wyłączone'), arr: withAll.sprintsNeededArr },
   ];
   let prevDays = 0;
   const impactRows = stepsDef.map((step, i) => {
     const sp = percentile(step.arr, 85);
-    const date = mc2AddPeriod(p.startDate, Math.ceil(sp), p.periodUnit);
+    const date = mcAddWeeks(p.startDate, Math.ceil(sp) * 2);
     const daysFromStart = Math.round((date - new Date(p.startDate+'T00:00:00')) / 86400000);
     const delta = i === 0 ? 0 : daysFromStart - prevDays;
     prevDays = daysFromStart;
@@ -2858,20 +2945,26 @@ function renderMonteCarlo2(){
     ${impactRows}
   `;
 
-  // ---- Histogram ----
+  // ---- Histogram (gradient-colored: higher percentile = more positive/green) ----
   const counts = {};
   sprintsNeededArr.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
   const sprintKeys = Object.keys(counts).map(Number).sort((a,b)=>a-b);
-  const histData = sprintKeys.map(s => ({
-    x: mc2AddPeriod(p.startDate, s, p.periodUnit).getTime(),
-    y: (counts[s] / MC_TRIALS) * 100,
-  }));
+  let cum = 0;
+  const histData = sprintKeys.map(s => {
+    cum += counts[s];
+    const cumPct = (cum / MC_TRIALS) * 100;
+    return {
+      x: mcAddWeeks(p.startDate, s * 2).getTime(),
+      y: (counts[s] / MC_TRIALS) * 100,
+      _cumPct: cumPct,
+    };
+  });
 
   const histDataset = {
     label: 'Trafienia (% prób)',
     data: histData,
-    backgroundColor: '#9b8cf299',
-    borderColor: '#9b8cf2',
+    backgroundColor: histData.map(d => pctToPositiveColor(d._cumPct, 0.6)),
+    borderColor: histData.map(d => pctToPositiveColor(d._cumPct, 1)),
     borderWidth: 1,
   };
 
@@ -2881,9 +2974,9 @@ function renderMonteCarlo2(){
       const xScale = c.scales.x, yScale = c.scales.y;
       const ctx = c.ctx;
       const markers = [
-        [dateP50.getTime(), '#9aa4b5', 'P50'],
-        [dateP85.getTime(), '#f2a65a', 'P85'],
-        [dateP95.getTime(), '#e4607a', 'P95'],
+        [dateP50.getTime(), PCT_MARKER_COLORS.p50, 'P50'],
+        [dateP85.getTime(), PCT_MARKER_COLORS.p85, 'P85'],
+        [dateP95.getTime(), PCT_MARKER_COLORS.p95, 'P95'],
       ];
       ctx.save();
       markers.forEach(([ts, color, label]) => {
@@ -2944,8 +3037,83 @@ function renderMonteCarlo2(){
     });
   } else {
     mc2Chart.data.datasets = [histDataset];
-    mc2Chart.options.scales.x.time.unit = (p.periodUnit === 'month') ? 'month' : 'week';
     mc2Chart.update();
+  }
+
+  // ---- Gantt chart: per-epic min (P5→P5) and max (P95→P95) execution window ----
+  const epicLabels = epics.map(e => e.name);
+  const ganttMin = epics.map((e, idx) => {
+    const s = percentile(epicStarts[idx], 5);
+    const en = percentile(epicEnds[idx], 5);
+    return [mcAddWeeks(p.startDate, (Math.max(0,s-1)) * 2).getTime(), mcAddWeeks(p.startDate, en * 2).getTime()];
+  });
+  const ganttMax = epics.map((e, idx) => {
+    const s = percentile(epicStarts[idx], 95);
+    const en = percentile(epicEnds[idx], 95);
+    return [mcAddWeeks(p.startDate, (Math.max(0,s-1)) * 2).getTime(), mcAddWeeks(p.startDate, en * 2).getTime()];
+  });
+
+  const ganttDatasets = [
+    {
+      label: 'Min (optymistyczny)',
+      data: ganttMin.map((range, i) => ({ x: range, y: epicLabels[i] })),
+      backgroundColor: 'rgba(79,209,197,0.75)',
+      borderColor: '#4fd1c5',
+      borderWidth: 1,
+      borderSkipped: false,
+      barThickness: 14,
+    },
+    {
+      label: 'Max (pesymistyczny)',
+      data: ganttMax.map((range, i) => ({ x: range, y: epicLabels[i] })),
+      backgroundColor: 'rgba(228,96,122,0.45)',
+      borderColor: '#e4607a',
+      borderWidth: 1,
+      borderSkipped: false,
+      barThickness: 14,
+    },
+  ];
+
+  if (!mc2GanttChart){
+    mc2GanttChart = new Chart(document.getElementById('mc2Gantt').getContext('2d'), {
+      type: 'bar',
+      data: { labels: epicLabels, datasets: ganttDatasets },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'week', tooltipFormat: 'dd.MM.yyyy', displayFormats: { week: 'dd.MM' } },
+            grid: { color: '#222837' },
+            ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
+          },
+          y: {
+            stacked: false,
+            grid: { color: '#222837' },
+            ticks: { color: '#bcc3cf', font:{family:"'IBM Plex Mono'", size:11} },
+          }
+        },
+        plugins: {
+          legend: { display: true, position: 'top', labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14 } },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            callbacks: {
+              title(items){ return items[0].label; },
+              label(item){
+                const r = item.raw.x;
+                return item.dataset.label + ': ' + new Date(r[0]).toLocaleDateString('pl-PL') + ' → ' + new Date(r[1]).toLocaleDateString('pl-PL');
+              }
+            }
+          }
+        }
+      }
+    });
+  } else {
+    mc2GanttChart.data.labels = epicLabels;
+    mc2GanttChart.data.datasets = ganttDatasets;
+    mc2GanttChart.update();
   }
 }
 
@@ -2955,24 +3123,16 @@ function mc2ScheduleRender(){
   mc2Debounce = setTimeout(renderMonteCarlo2, 120);
 }
 
-['mc2StartDate','mc2TargetDate','mc2Throughput'].forEach(id => {
+['mc2StartDate','mc2TargetDate','mc2Throughput','mc2Wip'].forEach(id => {
   document.getElementById(id).addEventListener('input', mc2ScheduleRender);
 });
-['mc2CapacityPct','mc2BoostPct'].forEach(id => {
-  document.getElementById(id).addEventListener('input', mc2ScheduleRender);
-});
-['mc2CapacityToggle','mc2BoostToggle'].forEach(id => {
+document.getElementById('mc2CapacityPct').addEventListener('input', mc2ScheduleRender);
+['mc2CapacityToggle','mc2MultToggle'].forEach(id => {
   document.getElementById(id).addEventListener('change', mc2ScheduleRender);
-});
-document.getElementById('mc2PeriodUnit').addEventListener('change', () => {
-  const isMonth = document.getElementById('mc2PeriodUnit').value === 'month';
-  document.getElementById('mc2ThroughputSprintField').style.display = isMonth ? 'none' : '';
-  document.getElementById('mc2ThroughputMonthField').style.display = isMonth ? '' : 'none';
-  mc2ScheduleRender();
 });
 
 renderEpicsTable();
-renderMonthlyTable();
+renderMonthMultTable();
 
 // ---------- Toast notifications ----------
 const toastEl = document.getElementById('toast');
@@ -3089,7 +3249,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     // For charts that already exist, force a resize once the pane is actually visible
     // (covers layout-width changes between tabs).
     requestAnimationFrame(() => {
-      [chart, xChart, mrChart, xChart2, mrChart2, mcChart, mc2Chart].forEach(c => { if (c) c.resize(); });
+      [chart, xChart, mrChart, xChart2, mrChart2, mcChart, mc2Chart, mc2GanttChart].forEach(c => { if (c) c.resize(); });
     });
   });
 });
