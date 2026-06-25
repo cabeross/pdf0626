@@ -851,7 +851,7 @@
   <div class="tab-pane" data-tab="mc2">
   <div class="tab-desc">
     <div class="tdtitle">Jak czytać tę prognozę</div>
-    Druga symulacja Monte Carlo (5000 prób) — ale tu <b>niepewność dotyczy też samego rozmiaru pracy</b>, nie tylko tempa. Każdy Epik ma zakres estymacji (min–max historyjek); w każdej próbie losujemy rozmiar każdego Epiku z jego zakresu, sumujemy, i sprawdzamy ile sprintów zajmie dostarczenie tej sumy przy danej przepustowości zespołu. <b>Dodawaj/usuwaj Epiki</b> w tabeli poniżej — każda zmienna (zakresy, % skupienia zespołu, wzrost przepustowości od września, daty) jest edytowalna ręcznie.
+    Druga symulacja Monte Carlo (5000 prób) — ale tu <b>niepewność dotyczy też samego rozmiaru pracy</b>, nie tylko tempa. Każdy Epik ma zakres estymacji (min–max historyjek); w każdej próbie losujemy rozmiar każdego Epiku z jego zakresu, sumujemy, i sprawdzamy ile okresów zajmie dostarczenie tej sumy przy danej przepustowości zespołu. <b>Dodawaj/usuwaj Epiki</b> w tabeli poniżej. Przepustowość możesz szacować w <b>sprintach (2 tyg.) lub miesięcznie</b> — wybierz jednostkę okresu i wpisz własne wartości historyczne. Każda zmienna jest edytowalna ręcznie.
   </div>
 
   <div class="section-divider">
@@ -873,8 +873,20 @@
         <input type="date" id="mc2TargetDate" value="2026-10-31">
       </div>
       <div class="mc-field">
+        <div class="mlabel">Jednostka okresu</div>
+        <select id="mc2PeriodUnit" style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;color-scheme:dark;">
+          <option value="sprint" selected>Sprint (2 tygodnie)</option>
+          <option value="month">Miesiąc</option>
+        </select>
+      </div>
+      <div class="mc-field" id="mc2ThroughputSprintField">
         <div class="mlabel">Przepustowość historyczna (sprinty, 2 tyg.)</div>
         <input type="text" id="mc2Throughput" value="3,4,5,4,2,7,4,5">
+      </div>
+      <div class="mc-field" id="mc2ThroughputMonthField" style="display:none;">
+        <div class="mlabel">Przepustowość historyczna (miesięcznie)</div>
+        <input type="text" id="mc2ThroughputMonth" value="8,9,7,10">
+        <div class="mc-toggle" style="margin-top:6px;"><span style="font-size:10px;color:var(--muted-2);">Twoje własne estymaty — np. ile historyjek/miesiąc zespół realnie dostarcza</span></div>
       </div>
       <div class="mc-field">
         <div class="mlabel">% czasu zespołu na tych Epikach <span class="mval" id="mc2CapacityVal">75%</span></div>
@@ -2595,10 +2607,22 @@ document.getElementById('addEpicBtn').addEventListener('click', () => {
   mc2ScheduleRender();
 });
 
+function mc2AddPeriod(dateStr, n, unit){
+  if (unit === 'month'){
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setMonth(d.getMonth() + n);
+    return d;
+  }
+  return mcAddWeeks(dateStr, n * 2);
+}
+
 function mc2ReadParams(){
-  const throughputHistory = document.getElementById('mc2Throughput').value
+  const periodUnit = document.getElementById('mc2PeriodUnit').value; // 'sprint' | 'month'
+  const throughputFieldId = periodUnit === 'month' ? 'mc2ThroughputMonth' : 'mc2Throughput';
+  const throughputHistory = document.getElementById(throughputFieldId).value
     .split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v) && v >= 0);
   return {
+    periodUnit,
     startDate: document.getElementById('mc2StartDate').value,
     targetDate: document.getElementById('mc2TargetDate').value,
     throughputHistory: throughputHistory.length ? throughputHistory : [1],
@@ -2646,8 +2670,8 @@ function mc2Simulate(p, overrides){
 
     for (let s = 1; s <= MC_MAX_SPRINTS; s++){
       const sample = hist[Math.floor(Math.random() * hist.length)];
-      const sprintStart = mcAddWeeks(p.startDate, (s - 1) * 2);
-      const sprintEnd = mcAddWeeks(p.startDate, s * 2);
+      const sprintStart = mc2AddPeriod(p.startDate, s - 1, p.periodUnit);
+      const sprintEnd = mc2AddPeriod(p.startDate, s, p.periodUnit);
 
       let mult = capacityMult;
       if (sprintStart >= sept1) mult *= boostMult;
@@ -2692,19 +2716,20 @@ function renderMonteCarlo2(){
   const p50sprints = percentile(sprintsNeededArr, 50);
   const p85sprints = percentile(sprintsNeededArr, 85);
   const p95sprints = percentile(sprintsNeededArr, 95);
-  const dateP50 = mcAddWeeks(p.startDate, Math.ceil(p50sprints) * 2);
-  const dateP85 = mcAddWeeks(p.startDate, Math.ceil(p85sprints) * 2);
-  const dateP95 = mcAddWeeks(p.startDate, Math.ceil(p95sprints) * 2);
+  const dateP50 = mc2AddPeriod(p.startDate, Math.ceil(p50sprints), p.periodUnit);
+  const dateP85 = mc2AddPeriod(p.startDate, Math.ceil(p85sprints), p.periodUnit);
+  const dateP95 = mc2AddPeriod(p.startDate, Math.ceil(p95sprints), p.periodUnit);
+  const unitLabel = p.periodUnit === 'month' ? 'miesięcy' : 'sprintów';
 
   const itemsP50 = percentile(itemsAtTargetArr, 50);
-  const itemsP85 = percentile(itemsAtTargetArr, 15);
   const itemsP95 = percentile(itemsAtTargetArr, 5);
+  const itemsP85b = percentile(itemsAtTargetArr, 15);
 
   document.getElementById('mc2Results').innerHTML = `
     <div class="mc-stat p50">
       <div class="lbl">Data ukończenia · P50</div>
       <div class="val">${mcFormatDate(dateP50)}</div>
-      <div class="sub">typowy scenariusz (~${Math.ceil(p50sprints)} sprintów)</div>
+      <div class="sub">typowy scenariusz (~${Math.ceil(p50sprints)} ${unitLabel})</div>
     </div>
     <div class="mc-stat p85">
       <div class="lbl">Data ukończenia · P85</div>
@@ -2718,7 +2743,7 @@ function renderMonteCarlo2(){
     </div>
     <div class="mc-stat">
       <div class="lbl">Do ${new Date(p.targetDate+'T00:00:00').toLocaleDateString('pl-PL')}</div>
-      <div class="val">${itemsP85.toFixed(0)} <span style="font-size:11px;color:var(--muted);">/ ${backlogP50.toFixed(0)} hist.</span></div>
+      <div class="val">${itemsP85b.toFixed(0)} <span style="font-size:11px;color:var(--muted);">/ ${backlogP50.toFixed(0)} hist.</span></div>
       <div class="sub">co najmniej tyle, 85% pewności (P50: ${itemsP50.toFixed(0)}, P95: ${itemsP95.toFixed(0)})</div>
     </div>
   `;
@@ -2736,7 +2761,7 @@ function renderMonteCarlo2(){
   let prevDays = 0;
   const impactRows = stepsDef.map((step, i) => {
     const sp = percentile(step.arr, 85);
-    const date = mcAddWeeks(p.startDate, Math.ceil(sp) * 2);
+    const date = mc2AddPeriod(p.startDate, Math.ceil(sp), p.periodUnit);
     const daysFromStart = Math.round((date - new Date(p.startDate+'T00:00:00')) / 86400000);
     const delta = i === 0 ? 0 : daysFromStart - prevDays;
     prevDays = daysFromStart;
@@ -2759,7 +2784,7 @@ function renderMonteCarlo2(){
   sprintsNeededArr.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
   const sprintKeys = Object.keys(counts).map(Number).sort((a,b)=>a-b);
   const histData = sprintKeys.map(s => ({
-    x: mcAddWeeks(p.startDate, s * 2).getTime(),
+    x: mc2AddPeriod(p.startDate, s, p.periodUnit).getTime(),
     y: (counts[s] / MC_TRIALS) * 100,
   }));
 
@@ -2840,6 +2865,7 @@ function renderMonteCarlo2(){
     });
   } else {
     mc2Chart.data.datasets = [histDataset];
+    mc2Chart.options.scales.x.time.unit = (p.periodUnit === 'month') ? 'month' : 'week';
     mc2Chart.update();
   }
 }
@@ -2850,7 +2876,7 @@ function mc2ScheduleRender(){
   mc2Debounce = setTimeout(renderMonteCarlo2, 120);
 }
 
-['mc2StartDate','mc2TargetDate','mc2Throughput'].forEach(id => {
+['mc2StartDate','mc2TargetDate','mc2Throughput','mc2ThroughputMonth'].forEach(id => {
   document.getElementById(id).addEventListener('input', mc2ScheduleRender);
 });
 ['mc2CapacityPct','mc2BoostPct'].forEach(id => {
@@ -2858,6 +2884,12 @@ function mc2ScheduleRender(){
 });
 ['mc2CapacityToggle','mc2BoostToggle'].forEach(id => {
   document.getElementById(id).addEventListener('change', mc2ScheduleRender);
+});
+document.getElementById('mc2PeriodUnit').addEventListener('change', () => {
+  const isMonth = document.getElementById('mc2PeriodUnit').value === 'month';
+  document.getElementById('mc2ThroughputSprintField').style.display = isMonth ? 'none' : '';
+  document.getElementById('mc2ThroughputMonthField').style.display = isMonth ? '' : 'none';
+  mc2ScheduleRender();
 });
 
 renderEpicsTable();
