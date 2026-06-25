@@ -373,6 +373,7 @@
       <canvas id="bubbleChart"></canvas>
     </div>
   </div>
+  </div>
   <!-- /tab: scatter -->
 
   <div class="tab-pane" data-tab="dist">
@@ -2109,8 +2110,10 @@ rebuildSliderBounds();
 fromInput.value = toISO(dataMin);
 toInput.value = toISO(dataMax);
 applyFilter();
-renderXmR();
-renderXmR2();
+// XmR charts (tabs 04/05) are intentionally NOT rendered here: their canvases live inside
+// a display:none pane at page load, and Chart.js permanently breaks if a chart is created
+// on a 0×0 canvas. Lazy-init happens on first visit to each tab (see tab nav below).
+let xmr1Loaded = false, xmr2Loaded = false;
 
 // XmR X-chart hover cursor
 const xChartCanvas = document.getElementById('xChart');
@@ -2135,8 +2138,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const target = btn.dataset.tab;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.dataset.tab === target));
-    // Charts created while their pane was display:none have a 0×0 canvas —
-    // force a resize once the pane becomes visible so they render correctly.
+
+    // Lazy-create XmR charts the first time their tab becomes visible — their canvases
+    // are 0×0 while hidden, and Chart.js never recovers from being created on those.
+    if (target === 'xmr1' && !xmr1Loaded){ xmr1Loaded = true; renderXmR(); }
+    if (target === 'xmr2' && !xmr2Loaded){ xmr2Loaded = true; renderXmR2(); }
+
+    // For charts that already exist, force a resize once the pane is actually visible
+    // (covers layout-width changes between tabs).
     requestAnimationFrame(() => {
       [chart, xChart, mrChart, xChart2, mrChart2].forEach(c => { if (c) c.resize(); });
     });
