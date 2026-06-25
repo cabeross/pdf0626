@@ -120,9 +120,7 @@
 
   .guide{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--border);border-left:3px solid var(--m);border-radius:10px;padding:16px 20px;margin-bottom:22px;}
   .guide h4{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);margin:0 0 12px;font-weight:500;}
-  .guide-items{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-  @media (max-width:1024px){ .guide-items{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:600px){ .guide-items{grid-template-columns:1fr;} }
+  .guide-items{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:18px;}
   .guide-item .gtitle{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
   .guide-item .gtitle .gnum{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);margin-right:6px;font-weight:400;}
   .guide-item .gtext{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.55;}
@@ -225,6 +223,17 @@
   .xmr-card .ctext .gray{color:#9aa4b5;}
   .xmr-card .ctext ul{margin:6px 0 0;padding-left:14px;}
   .xmr-card .ctext li{margin-bottom:3px;}
+
+  .xmr-rules{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 4px;}
+  @media (max-width:900px){ .xmr-rules{grid-template-columns:repeat(2,1fr);} }
+  .rule-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;font-family:'IBM Plex Mono',monospace;color:var(--muted);transition:all .15s ease;opacity:0.55;}
+  .rule-card.active{opacity:1;border-color:var(--rule-color);box-shadow:0 0 0 1px var(--rule-color) inset;}
+  .rule-card:hover{opacity:0.85;}
+  .rule-card .rc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .rule-card .rc-dot{width:9px;height:9px;border-radius:50%;}
+  .rule-card .rc-count{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text);}
+  .rule-card .rc-name{display:block;font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .rule-card .rc-desc{display:block;font-size:10px;color:var(--muted-2);line-height:1.4;}
 
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
@@ -458,6 +467,8 @@
       <div class="xmr-summary" id="xmrSummary"></div>
     </div>
 
+    <div class="xmr-rules" id="xmrRules"></div>
+
     <div class="xmr-guide">
       <div class="xmr-card accent-x">
         <div class="ctitle">Wykres X <span class="ctag">górny</span></div>
@@ -466,7 +477,7 @@
           <ul>
             <li><span class="gray">━ ━</span> linia CL = średnia <b>X̄</b></li>
             <li><span class="red">┄ ┄</span> linie UNPL/LNPL = <b>X̄ ± 2,66·mR̄</b> ≈ ±3σ procesu</li>
-            <li>🔴 czerwona kropka = task <b>poza granicami</b> → sygnał</li>
+            <li>kropkowane szare linie dzielą odległość CL→NPL na <b>tercje</b>: 1/3 i 2/3 NPL (góra i dół)</li>
             <li><b>Kliknij kropkę</b>, żeby wykluczyć/przywrócić task — tak jak w tabeli poniżej</li>
           </ul>
         </div>
@@ -480,6 +491,20 @@
             <li><span class="gray">━ ━</span> linia CL = średni zakres ruchomy <b>mR̄</b></li>
             <li><span class="red">┄ ┄</span> UNPL = <b>3,267·mR̄</b> (LNPL zawsze 0)</li>
             <li>🔴 czerwona kropka = <b>nadzwyczajny skok</b> między tymi dwoma taskami</li>
+            <li>Reguły strefowe (1–4) liczone są tylko na wykresie X, nie na mR — to standardowa praktyka SPC</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card" style="border-top:2px solid var(--m);">
+        <div class="ctitle">4 reguły sygnałów <span class="ctag">wykres X</span></div>
+        <div class="ctext">
+          <b>Decyzja analityczna:</b> liczymy tylko przekroczenia <b>powyżej</b> wytycznych (pogorszenie cycle time). Spadki poniżej średniej nie są tu sygnałem. Kolejność punktów w oknie nie ma znaczenia — 101, 110 i 011 to ten sam sygnał.
+          <ul>
+            <li><b style="color:#ff6b8a">●</b> R1 — pojedynczy punkt <b>powyżej UNPL</b></li>
+            <li><b style="color:#f2a65a">●</b> R2 — <b>2 z 3</b> kolejnych punktów <b>powyżej</b> linii 2/3 UNPL</li>
+            <li><b style="color:#e8d44d">●</b> R3 — <b>3 z 5</b> kolejnych punktów <b>powyżej</b> linii 1/3 UNPL</li>
+            <li><b style="color:#7c9fe0">●</b> R4 — <b>8 z rzędu</b> powyżej średniej (trwała mała zmiana)</li>
           </ul>
         </div>
       </div>
@@ -489,9 +514,9 @@
         <div class="ctext">
           Sygnał to dowód, że na ten task wpłynęła <b>specjalna przyczyna</b> (zmiana zakresu, brak zasobów, awaria, zmiana zespołu, święto, klient itp.), nie zwykła zmienność procesu.
           <ul>
-            <li>Wartościowe jest <b>pogrzebanie się w tym konkretnym taskiem</b></li>
-            <li>Sygnał na X i mR jednocześnie → punkt zwrotny w trendzie</li>
-            <li>Sygnał może być pozytywny (np. ekspresowo)</li>
+            <li>R1 i R2 = ostre sygnały, warto <b>od razu zbadać konkretny task</b></li>
+            <li>R3 i R4 = sygnały <b>narastającej, trwałej zmiany</b> — szukaj przyczyny systemowej, nie pojedynczego taska</li>
+            <li>Przyciski-karty powyżej wykresu <b>włączają / wyłączają</b> podświetlenie każdej reguły</li>
           </ul>
         </div>
       </div>
@@ -1120,14 +1145,63 @@ function computeXmR(source, dateField, valueField){
   const UCL = mean + XMR_E2 * mrBar;
   const LCL = Math.max(0, mean - XMR_E2 * mrBar);  // clamp at 0 (negative time impossible)
   const UCL_mr = XMR_D4 * mrBar;
-  const xSignals = sorted.map((r,i) => vals[i] > UCL || vals[i] < LCL);
+  const xSignals = sorted.map((r,i) => vals[i] > UCL); // analysis decision: only flag degradation (above), not improvement (below)
   const mrSignals = mr.map(v => v > UCL_mr);
-  return { sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals, dateField, valueField };
+
+  // ---- Zone thresholds (between mean and each natural process limit, split into thirds) ----
+  const upSpan = UCL - mean;
+  const downSpan = mean - LCL;
+  const oneThirdUp   = mean + upSpan / 3;
+  const twoThirdUp   = mean + 2 * upSpan / 3;
+  const oneThirdDown = mean - downSpan / 3;
+  const twoThirdDown = mean - 2 * downSpan / 3;
+
+  // ---- Western Electric / Wheeler zone-test rules (computed on the X chart only) ----
+  // Analysis decision: only the "above guideline" direction counts as a signal here
+  // (cycle time getting worse). Crossing below the same thresholds is not flagged.
+  const n = vals.length;
+  const rule1 = xSignals.slice(); // beyond UNPL — already computed above
+  const rule2 = new Array(n).fill(false); // 2 of 3 consecutive beyond 2/3 UNPL
+  const rule3 = new Array(n).fill(false); // 3 of 5 consecutive beyond 1/3 UNPL
+  const rule4 = new Array(n).fill(false); // 8 consecutive above the mean
+
+  for (let i = 0; i < n; i++){
+    // Rule 2: window of 3 ending at i
+    if (i >= 2){
+      let upCount = 0;
+      for (let k = i-2; k <= i; k++){
+        if (vals[k] > twoThirdUp) upCount++;
+      }
+      if (upCount >= 2) rule2[i] = true;
+    }
+    // Rule 3: window of 5 ending at i
+    if (i >= 4){
+      let upCount = 0;
+      for (let k = i-4; k <= i; k++){
+        if (vals[k] > oneThirdUp) upCount++;
+      }
+      if (upCount >= 3) rule3[i] = true;
+    }
+    // Rule 4: window of 8 ending at i, all strictly above the mean
+    if (i >= 7){
+      let allAbove = true;
+      for (let k = i-7; k <= i; k++){
+        if (!(vals[k] > mean)) allAbove = false;
+      }
+      if (allAbove) rule4[i] = true;
+    }
+  }
+
+  return {
+    sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals, dateField, valueField,
+    oneThirdUp, twoThirdUp, oneThirdDown, twoThirdDown,
+    rule1, rule2, rule3, rule4,
+  };
 }
 
 let xChart = null, mrChart = null;
 
-function makeLimitDataset(label, value, color, dash, source, dateField){
+function makeLimitDataset(label, value, color, dash, source, dateField, width){
   if (!source.length) return null;
   const firstX = new Date(source[0][dateField]).getTime();
   const lastX = new Date(source[source.length-1][dateField]).getTime();
@@ -1136,7 +1210,7 @@ function makeLimitDataset(label, value, color, dash, source, dateField){
     data: [{x:firstX, y:value}, {x:lastX, y:value}],
     type: 'line',
     borderColor: color,
-    borderWidth: 1.3,
+    borderWidth: width || 1.3,
     borderDash: dash,
     pointRadius: 0,
     pointHoverRadius: 0,
@@ -1148,18 +1222,83 @@ function makeLimitDataset(label, value, color, dash, source, dateField){
 
 const SIGNAL_RED = '#ff6b8a';
 const CYCLE_COLOR = '#4fd1c5';
+const RULE2_COLOR = '#f2a65a'; // 2 of 3 beyond 2/3 line — moderate signal
+const RULE3_COLOR = '#e8d44d'; // 3 of 5 beyond 1/3 line — moderate persistent signal
+const RULE4_COLOR = '#7c9fe0'; // 8 in a row on one side of mean — sustained small shift
+const ZONE_LINE_COLOR = '#aab3c4';
+
+// Toggle state — which rule highlighting is visible on the X chart
+const ruleToggles = { r1: true, r2: true, r3: true, r4: true };
+
+function makeZoneLineDataset(value, source, dateField){
+  if (!source.length) return null;
+  const firstX = new Date(source[0][dateField]).getTime();
+  const lastX = new Date(source[source.length-1][dateField]).getTime();
+  return {
+    label: '_zone', // excluded from legend via filter
+    data: [{x:firstX, y:value}, {x:lastX, y:value}],
+    type: 'line',
+    borderColor: ZONE_LINE_COLOR,
+    borderWidth: 1.6,
+    borderDash: [5,3],
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    fill: false,
+    tension: 0,
+    order: 100,
+  };
+}
+
+// Draws "1/3 UNPL" / "2/3 UNPL" / "1/3 LNPL" / "2/3 LNPL" labels at the right edge of the X chart
+const zoneLabelPlugin = {
+  id: 'zoneLabels',
+  afterDraw(chart){
+    if (chart.canvas.id !== 'xChart') return;
+    const xmr = chart._xmrRef;
+    if (!xmr) return;
+    const yScale = chart.scales.y;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.font = '600 10.5px IBM Plex Mono';
+    ctx.textAlign = 'left';
+    const labels = [
+      [xmr.twoThirdUp,   '2/3 UNPL'],
+      [xmr.oneThirdUp,   '1/3 UNPL'],
+      [xmr.oneThirdDown, '1/3 LNPL'],
+      [xmr.twoThirdDown, '2/3 LNPL'],
+    ];
+    labels.forEach(([val, text]) => {
+      const yPix = yScale.getPixelForValue(val);
+      if (yPix < yScale.top || yPix > yScale.bottom) return;
+      const tx = chart.chartArea.right + 5;
+      const tw = ctx.measureText(text).width;
+      ctx.fillStyle = 'rgba(26,30,38,0.85)';
+      ctx.fillRect(tx - 2, yPix - 8, tw + 4, 16);
+      ctx.fillStyle = ZONE_LINE_COLOR;
+      ctx.fillText(text, tx, yPix + 3.5);
+    });
+    ctx.restore();
+  }
+};
 
 function buildXChartData(xmr){
-  const { sorted, vals, UCL, LCL, mean, xSignals, dateField, valueField } = xmr;
+  const { sorted, vals, UCL, LCL, mean, dateField, rule1, rule2, rule3, rule4 } = xmr;
+
+  const pointStyle = sorted.map((r,i) => {
+    if (ruleToggles.r1 && rule1[i]) return { color: SIGNAL_RED,  radius: 7,   border: '#fff' };
+    if (ruleToggles.r2 && rule2[i]) return { color: RULE2_COLOR, radius: 6.3, border: '#fff' };
+    if (ruleToggles.r3 && rule3[i]) return { color: RULE3_COLOR, radius: 5.8, border: '#1a1e26' };
+    if (ruleToggles.r4 && rule4[i]) return { color: RULE4_COLOR, radius: 5.8, border: '#fff' };
+    return { color: CYCLE_COLOR, radius: 4, border: CYCLE_COLOR };
+  });
+
   const dataPoints = sorted.map((r,i) => ({
     x: new Date(r[dateField]).getTime(),
     y: vals[i],
     _raw: r,
-    _signal: xSignals[i],
+    _signal: rule1[i],
+    _rule2: rule2[i], _rule3: rule3[i], _rule4: rule4[i],
   }));
-  const ptColors  = sorted.map((r,i) => xSignals[i] ? SIGNAL_RED : CYCLE_COLOR);
-  const ptBorders = sorted.map((r,i) => xSignals[i] ? '#fff' : CYCLE_COLOR);
-  const ptRadii   = sorted.map((r,i) => xSignals[i] ? 6 : 4);
 
   const series = {
     label: 'Cycle time',
@@ -1167,19 +1306,24 @@ function buildXChartData(xmr){
     type: 'line',
     borderColor: 'rgba(236,239,243,0.45)',
     borderWidth: 1.2,
-    pointBackgroundColor: ptColors,
-    pointBorderColor: ptBorders,
+    pointBackgroundColor: pointStyle.map(s => s.color),
+    pointBorderColor: pointStyle.map(s => s.border),
     pointBorderWidth: 1.2,
-    pointRadius: ptRadii,
-    pointHoverRadius: 7,
+    pointRadius: pointStyle.map(s => s.radius),
+    pointHoverRadius: 8,
     fill: false,
     tension: 0,
     order: 1,
   };
   const datasets = [series];
-  const ucl = makeLimitDataset('UNPL', UCL, SIGNAL_RED, [6,4], sorted, dateField);
-  const lcl = makeLimitDataset('LNPL', LCL, SIGNAL_RED, [6,4], sorted, dateField);
-  const cl  = makeLimitDataset('CL',  mean, '#9aa4b5', [3,3], sorted, dateField);
+  const ucl = makeLimitDataset('UNPL', UCL, SIGNAL_RED, [7,3], sorted, dateField, 2.2);
+  const lcl = makeLimitDataset('LNPL', LCL, SIGNAL_RED, [7,3], sorted, dateField, 2.2);
+  const cl  = makeLimitDataset('CL',  mean, '#c3cad6', [4,2], sorted, dateField, 1.8);
+  const z1 = makeZoneLineDataset(xmr.twoThirdUp,   sorted, dateField);
+  const z2 = makeZoneLineDataset(xmr.oneThirdUp,   sorted, dateField);
+  const z3 = makeZoneLineDataset(xmr.oneThirdDown, sorted, dateField);
+  const z4 = makeZoneLineDataset(xmr.twoThirdDown, sorted, dateField);
+  [z1,z2,z3,z4].forEach(z => { if (z) datasets.push(z); });
   if (ucl) datasets.push(ucl);
   if (lcl) datasets.push(lcl);
   if (cl)  datasets.push(cl);
@@ -1216,8 +1360,8 @@ function buildMRChartData(xmr){
   };
   const datasets = [series];
   const sliceFromSecond = sorted.slice(1);
-  const ucl = makeLimitDataset('UNPL mR', UCL_mr, SIGNAL_RED, [6,4], sliceFromSecond, dateField);
-  const cl  = makeLimitDataset('mR̄', mrBar, '#9aa4b5', [3,3], sliceFromSecond, dateField);
+  const ucl = makeLimitDataset('UNPL mR', UCL_mr, SIGNAL_RED, [7,3], sliceFromSecond, dateField, 2.2);
+  const cl  = makeLimitDataset('mR̄', mrBar, '#c3cad6', [4,2], sliceFromSecond, dateField, 1.8);
   if (ucl) datasets.push(ucl);
   if (cl)  datasets.push(cl);
   return datasets;
@@ -1240,7 +1384,10 @@ function xmrTooltipCallbacks(){
         if (item.dataset.label !== 'Zakres ruchomy' && r){
           lines.push('Started: ' + new Date(r.started).toLocaleDateString('pl-PL'));
         }
-        if (raw._signal) lines.push('⚠ Sygnał — poza granicą kontrolną');
+        if (raw._signal) lines.push('⚠ Reguła 1 — powyżej UNPL');
+        if (raw._rule2) lines.push('⚠ Reguła 2 — 2 z 3 powyżej 2/3 UNPL');
+        if (raw._rule3) lines.push('⚠ Reguła 3 — 3 z 5 powyżej 1/3 UNPL');
+        if (raw._rule4) lines.push('⚠ Reguła 4 — 8 z rzędu powyżej średniej');
         return lines;
       }
     }
@@ -1267,9 +1414,11 @@ function renderXmR(){
   const source = cycleActive();
   const summaryEl = document.getElementById('xmrSummary');
   const verdictEl = document.getElementById('xmrVerdict');
+  const rulesEl = document.getElementById('xmrRules');
 
   if (source.length < 2){
     summaryEl.innerHTML = '';
+    rulesEl.innerHTML = '';
     verdictEl.className = 'xmr-verdict';
     verdictEl.textContent = 'Za mało tasków w zbiorze, żeby policzyć XmR (potrzeba ≥ 2).';
     if (xChart) { xChart.data.datasets = []; xChart.update(); }
@@ -1278,28 +1427,59 @@ function renderXmR(){
   }
 
   const xmr = computeXmR(source, 'closed', 'cycleTime');
-  const xSignalCount  = xmr.xSignals.filter(Boolean).length;
+  const r1n = xmr.rule1.filter(Boolean).length;
+  const r2n = xmr.rule2.filter(Boolean).length;
+  const r3n = xmr.rule3.filter(Boolean).length;
+  const r4n = xmr.rule4.filter(Boolean).length;
   const mrSignalCount = xmr.mrSignals.filter(Boolean).length;
-  const totalSignals = xSignalCount + mrSignalCount;
+  const totalSignals = r1n + r2n + r3n + r4n + mrSignalCount;
 
   // Summary
   summaryEl.innerHTML = `
     <div class="xmr-stat"><div class="lbl">Średnia (CL)</div><div class="val">${xmr.mean.toFixed(0)}<span style="font-size:10px;color:var(--muted);margin-left:3px;">dni</span></div></div>
     <div class="xmr-stat"><div class="lbl">σ procesu</div><div class="val">${xmr.sigma.toFixed(1)}</div></div>
     <div class="xmr-stat"><div class="lbl">UNPL · LNPL</div><div class="val">${xmr.UCL.toFixed(0)} · ${xmr.LCL.toFixed(0)}</div></div>
-    <div class="xmr-stat"><div class="lbl">Sygnały</div><div class="val ${totalSignals ? 'warn' : 'ok'}">${totalSignals}</div></div>
+    <div class="xmr-stat"><div class="lbl">Sygnały (łącznie)</div><div class="val ${totalSignals ? 'warn' : 'ok'}">${totalSignals}</div></div>
   `;
+
+  // Rule toggle cards
+  const ruleDefs = [
+    { key:'r1', color: SIGNAL_RED,  name:'Reguła 1 — poza NPL',       desc:'pojedynczy punkt powyżej UNPL', count: r1n },
+    { key:'r2', color: RULE2_COLOR, name:'Reguła 2 — 2 z 3',          desc:'2 z 3 kolejnych powyżej linii 2/3 UNPL', count: r2n },
+    { key:'r3', color: RULE3_COLOR, name:'Reguła 3 — 3 z 5',          desc:'3 z 5 kolejnych powyżej linii 1/3 UNPL', count: r3n },
+    { key:'r4', color: RULE4_COLOR, name:'Reguła 4 — 8 z rzędu',      desc:'8 kolejnych punktów powyżej średniej', count: r4n },
+  ];
+  rulesEl.innerHTML = ruleDefs.map(rd => `
+    <button class="rule-card ${ruleToggles[rd.key] ? 'active' : ''}" data-rule="${rd.key}" style="--rule-color:${rd.color}">
+      <span class="rc-top">
+        <span class="rc-dot" style="background:${rd.color}"></span>
+        <span class="rc-count">${rd.count}</span>
+      </span>
+      <span class="rc-name">${rd.name}</span>
+      <span class="rc-desc">${rd.desc}</span>
+    </button>
+  `).join('');
+  rulesEl.querySelectorAll('.rule-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.rule;
+      ruleToggles[key] = !ruleToggles[key];
+      renderXmR();
+    });
+  });
 
   // Verdict
   if (totalSignals === 0){
     verdictEl.className = 'xmr-verdict in-control';
-    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żadne obserwacje nie wykraczają poza granice kontrolne. Wahania mieszczą się w typowej zmienności procesu — nie ma sygnałów specjalnych przyczyn w tym zbiorze.`;
+    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żadna obserwacja nie przekracza UNPL ani nie tworzy podejrzanego wzorca pogorszenia (reguły 1–4, liczone tylko w kierunku wzrostu cycle time). Wahania mieszczą się w typowej zmienności procesu.`;
   } else {
     verdictEl.className = 'xmr-verdict out-of-control';
     const parts = [];
-    if (xSignalCount) parts.push(`<b>${xSignalCount}</b> task${xSignalCount===1?'':'i'} z cycle time poza UNPL/LNPL`);
-    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'a':'e'} skok${mrSignalCount===1?'':'i'} między kolejnymi taskami (mR > UNPL)`);
-    verdictEl.innerHTML = `<span class="vlabel">Sygnały specjalnych przyczyn</span>${parts.join(' · ')}. Każdy taki punkt warto przeanalizować osobno — coś nietypowego wpłynęło na proces (zmiana zespołu, brak zasobów, zmiana zakresu zlecenia itp.).`;
+    if (r1n) parts.push(`<b>${r1n}</b> punkt${r1n===1?'':'y'} powyżej UNPL (reguła 1)`);
+    if (r2n) parts.push(`<b>${r2n}</b> sygnał${r2n===1?'':'y'} typu 2 z 3 powyżej 2/3 UNPL (reguła 2)`);
+    if (r3n) parts.push(`<b>${r3n}</b> sygnał${r3n===1?'':'y'} typu 3 z 5 powyżej 1/3 UNPL (reguła 3)`);
+    if (r4n) parts.push(`<b>${r4n}</b> seri${r4n===1?'a':'e'} 8 z rzędu powyżej średniej (reguła 4)`);
+    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'y':'e'} skok${mrSignalCount===1?'':'i'} mR`);
+    verdictEl.innerHTML = `<span class="vlabel">Sygnały specjalnych przyczyn</span>${parts.join(' · ')}. Każdy taki punkt warto przeanalizować osobno — coś nietypowego wpłynęło na proces (zmiana zespołu, brak zasobów, zmiana zakresu zlecenia itp.). Włącz/wyłącz reguły przyciskami powyżej, żeby zobaczyć je osobno na wykresie.`;
   }
 
   // Update charts
@@ -1307,12 +1487,14 @@ function renderXmR(){
     xChart = new Chart(document.getElementById('xChart').getContext('2d'), {
       type: 'line',
       data: { datasets: [] },
+      plugins: [zoneLabelPlugin],
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { right: 56 } },
         scales: commonXmRScales(),
         onClick: (evt) => handleXChartClick(evt),
         plugins: {
-          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Cycle time' } },
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Cycle time' && i.text !== '_zone' } },
           tooltip: {
             backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
             titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
@@ -1338,6 +1520,7 @@ function renderXmR(){
       }
     });
   }
+  xChart._xmrRef = xmr;
   xChart.data.datasets = buildXChartData(xmr);
   mrChart.data.datasets = buildMRChartData(xmr);
   xChart.update();
