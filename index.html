@@ -286,6 +286,12 @@
 
   .mc-chart-area{position:relative;height:340px;margin-top:18px;}
 
+  .epic-table input[type="text"]{width:100%;background:transparent;border:none;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;}
+  .epic-table input[type="number"]{width:70px;background:var(--panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:5px 7px;color-scheme:dark;}
+  .epic-table input:focus{outline:none;border-color:var(--m);}
+  .add-epic-btn{background:var(--panel-2);border:1px dashed var(--border);border-radius:8px;padding:9px 16px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;margin-top:10px;transition:all .15s ease;}
+  .add-epic-btn:hover{color:var(--text);border-color:var(--m);}
+
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
 
@@ -316,6 +322,7 @@
     <button class="tab-btn" data-tab="xmr1">04 · XmR — Cycle Time</button>
     <button class="tab-btn" data-tab="xmr2">05 · XmR — Throughput (tydzień)</button>
     <button class="tab-btn" data-tab="mc">06 · Prognoza Monte Carlo</button>
+    <button class="tab-btn" data-tab="mc2">07 · Monte Carlo — Epiki</button>
   </div>
 
   <div class="tab-pane active" data-tab="scatter">
@@ -840,6 +847,85 @@
 
   </div>
   <!-- /tab: mc -->
+
+  <div class="tab-pane" data-tab="mc2">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak czytać tę prognozę</div>
+    Druga symulacja Monte Carlo (5000 prób) — ale tu <b>niepewność dotyczy też samego rozmiaru pracy</b>, nie tylko tempa. Każdy Epik ma zakres estymacji (min–max historyjek); w każdej próbie losujemy rozmiar każdego Epiku z jego zakresu, sumujemy, i sprawdzamy ile sprintów zajmie dostarczenie tej sumy przy danej przepustowości zespołu. <b>Dodawaj/usuwaj Epiki</b> w tabeli poniżej — każda zmienna (zakresy, % skupienia zespołu, wzrost przepustowości od września, daty) jest edytowalna ręcznie.
+  </div>
+
+  <div class="section-divider">
+    <span class="num">07</span>
+    <span class="stitle">Prognoza dostarczenia Epików — Monte Carlo</span>
+    <span class="rule"></span>
+    <span class="ssub">6 Epików z zakresami estymacji, start lipiec 2026, cel koniec października 2026. Zespół poświęca na nie 75% czasu, z oczekiwanym wzrostem przepustowości od września.</span>
+  </div>
+
+  <div class="mc-panel">
+    <div class="mc-section-label">Parametry projektu i historii<span class="ln"></span></div>
+    <div class="mc-controls">
+      <div class="mc-field">
+        <div class="mlabel">Start prac</div>
+        <input type="date" id="mc2StartDate" value="2026-07-01">
+      </div>
+      <div class="mc-field">
+        <div class="mlabel">Data docelowa</div>
+        <input type="date" id="mc2TargetDate" value="2026-10-31">
+      </div>
+      <div class="mc-field">
+        <div class="mlabel">Przepustowość historyczna (sprinty, 2 tyg.)</div>
+        <input type="text" id="mc2Throughput" value="3,4,5,4,2,7,4,5">
+      </div>
+      <div class="mc-field">
+        <div class="mlabel">% czasu zespołu na tych Epikach <span class="mval" id="mc2CapacityVal">75%</span></div>
+        <input type="range" id="mc2CapacityPct" min="10" max="100" step="5" value="75">
+        <div class="mc-toggle">
+          <input type="checkbox" id="mc2CapacityToggle" checked>
+          <label for="mc2CapacityToggle">Uwzględnij ograniczenie skupienia</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mc-section-label">Czynnik — wzrost przepustowości od września (urlopy + znajomość domeny)<span class="ln"></span></div>
+    <div class="mc-controls">
+      <div class="mc-field" style="grid-column: span 2;">
+        <div class="mlabel">Wzrost przepustowości <span class="mval" id="mc2BoostVal">+20%</span></div>
+        <input type="range" id="mc2BoostPct" min="0" max="60" step="5" value="20">
+        <div class="mc-toggle">
+          <input type="checkbox" id="mc2BoostToggle" checked>
+          <label for="mc2BoostToggle">Uwzględnij w prognozie</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mc-section-label">Epiki (paczki wartości) — edytuj zakresy, dodawaj i usuwaj<span class="ln"></span></div>
+    <div class="table-scroll" style="max-height:320px;">
+      <table class="data-table epic-table">
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th class="num">Estymacja min (historyjek)</th>
+            <th class="num">Estymacja max (historyjek)</th>
+            <th style="width:30px;"></th>
+          </tr>
+        </thead>
+        <tbody id="epicsTableBody"></tbody>
+      </table>
+    </div>
+    <button class="add-epic-btn" id="addEpicBtn">+ Dodaj Epik</button>
+
+    <div class="mc-section-label" style="margin-top:24px;">Wynik prognozy (z wszystkimi włączonymi czynnikami)<span class="ln"></span></div>
+    <div class="mc-results" id="mc2Results"></div>
+
+    <div class="mc-impact" id="mc2Impact"></div>
+
+    <div class="mc-chart-area">
+      <canvas id="mc2Chart"></canvas>
+    </div>
+  </div>
+
+  </div>
+  <!-- /tab: mc2 -->
 
   <footer>
     <b>Źródło:</b> Lead_Times_202425.xlsx · <b>n</b> = 36 tasków · Kolor kółka oznacza deklarowany rozmiar taska (S / M / L).
@@ -2458,6 +2544,324 @@ function mcScheduleRender(){
   document.getElementById(id).addEventListener('change', mcScheduleRender);
 });
 
+// ---------- Monte Carlo forecast #2 — Epics with size uncertainty (tab 07) ----------
+let epicIdCounter = 6;
+const epics = [
+  { id: 'e1', name: 'Epik 1', min: 4, max: 6 },
+  { id: 'e2', name: 'Epik 2', min: 3, max: 5 },
+  { id: 'e3', name: 'Epik 3', min: 3, max: 4 },
+  { id: 'e4', name: 'Epik 4', min: 3, max: 5 },
+  { id: 'e5', name: 'Epik 5', min: 4, max: 7 },
+  { id: 'e6', name: 'Epik 6', min: 4, max: 8 },
+];
+
+function renderEpicsTable(){
+  const tbody = document.getElementById('epicsTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = epics.map(e => `
+    <tr data-id="${e.id}">
+      <td><input type="text" value="${e.name}" data-field="name" data-id="${e.id}"></td>
+      <td class="num"><input type="number" value="${e.min}" min="0" max="999" step="1" data-field="min" data-id="${e.id}"></td>
+      <td class="num"><input type="number" value="${e.max}" min="0" max="999" step="1" data-field="max" data-id="${e.id}"></td>
+      <td><button class="del-btn" data-del-epic="${e.id}" title="Usuń">×</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const e = epics.find(x => x.id === inp.dataset.id);
+      if (!e) return;
+      if (inp.dataset.field === 'name') e.name = inp.value;
+      else e[inp.dataset.field] = parseFloat(inp.value) || 0;
+      mc2ScheduleRender();
+    });
+  });
+  tbody.querySelectorAll('[data-del-epic]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = epics.findIndex(x => x.id === btn.dataset.delEpic);
+      if (idx >= 0){
+        epics.splice(idx, 1);
+        renderEpicsTable();
+        mc2ScheduleRender();
+      }
+    });
+  });
+}
+
+document.getElementById('addEpicBtn').addEventListener('click', () => {
+  epicIdCounter++;
+  epics.push({ id: 'e' + epicIdCounter, name: 'Epik ' + epicIdCounter, min: 3, max: 5 });
+  renderEpicsTable();
+  mc2ScheduleRender();
+});
+
+function mc2ReadParams(){
+  const throughputHistory = document.getElementById('mc2Throughput').value
+    .split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v) && v >= 0);
+  return {
+    startDate: document.getElementById('mc2StartDate').value,
+    targetDate: document.getElementById('mc2TargetDate').value,
+    throughputHistory: throughputHistory.length ? throughputHistory : [1],
+    capacityPct: parseFloat(document.getElementById('mc2CapacityPct').value) || 100,
+    includeCapacity: document.getElementById('mc2CapacityToggle').checked,
+    boostPct: parseFloat(document.getElementById('mc2BoostPct').value) || 0,
+    includeBoost: document.getElementById('mc2BoostToggle').checked,
+  };
+}
+
+function mc2SampleBacklog(){
+  // Each Epic's size is uncertain — draw uniformly from its [min,max] range, sum across all Epics.
+  return epics.reduce((sum, e) => {
+    const lo = Math.min(e.min, e.max), hi = Math.max(e.min, e.max);
+    const draw = lo + Math.random() * (hi - lo);
+    return sum + Math.round(draw);
+  }, 0);
+}
+
+function mc2Simulate(p, overrides){
+  const includeCapacity = overrides && 'includeCapacity' in overrides ? overrides.includeCapacity : p.includeCapacity;
+  const includeBoost    = overrides && 'includeBoost'    in overrides ? overrides.includeBoost    : p.includeBoost;
+
+  const startDateObj = new Date(p.startDate + 'T00:00:00');
+  const targetDateObj = new Date(p.targetDate + 'T00:00:00');
+  const year = startDateObj.getFullYear();
+  const sept1 = new Date(year + '-09-01T00:00:00');
+
+  const capacityMult = includeCapacity ? (p.capacityPct / 100) : 1;
+  const boostMult = includeBoost ? (1 + p.boostPct / 100) : 1;
+  const hist = p.throughputHistory;
+
+  const sprintsNeededArr = [];
+  const itemsAtTargetArr = [];
+  const backlogSamples = [];
+
+  for (let trial = 0; trial < MC_TRIALS; trial++){
+    const backlog = mc2SampleBacklog();
+    backlogSamples.push(backlog);
+
+    let cumulative = 0;
+    let sprintsNeeded = null;
+    let itemsAtTarget = 0;
+    let targetLocked = false;
+
+    for (let s = 1; s <= MC_MAX_SPRINTS; s++){
+      const sample = hist[Math.floor(Math.random() * hist.length)];
+      const sprintStart = mcAddWeeks(p.startDate, (s - 1) * 2);
+      const sprintEnd = mcAddWeeks(p.startDate, s * 2);
+
+      let mult = capacityMult;
+      if (sprintStart >= sept1) mult *= boostMult;
+
+      const eff = Math.max(0, Math.round(sample * mult));
+      cumulative += eff;
+
+      if (!targetLocked){
+        if (sprintEnd <= targetDateObj){
+          itemsAtTarget = Math.min(cumulative, backlog);
+        } else {
+          targetLocked = true;
+        }
+      }
+
+      if (sprintsNeeded === null && cumulative >= backlog){
+        sprintsNeeded = s;
+        if (targetLocked) break;
+      }
+      if (sprintsNeeded !== null && targetLocked) break;
+    }
+
+    sprintsNeededArr.push(sprintsNeeded === null ? MC_MAX_SPRINTS : sprintsNeeded);
+    itemsAtTargetArr.push(itemsAtTarget);
+  }
+
+  return { sprintsNeededArr, itemsAtTargetArr, backlogSamples };
+}
+
+let mc2Chart = null;
+
+function renderMonteCarlo2(){
+  const p = mc2ReadParams();
+
+  document.getElementById('mc2CapacityVal').textContent = p.capacityPct + '%';
+  document.getElementById('mc2BoostVal').textContent = '+' + p.boostPct + '%';
+
+  const result = mc2Simulate(p);
+  const { sprintsNeededArr, itemsAtTargetArr, backlogSamples } = result;
+  const backlogP50 = percentile(backlogSamples, 50);
+
+  const p50sprints = percentile(sprintsNeededArr, 50);
+  const p85sprints = percentile(sprintsNeededArr, 85);
+  const p95sprints = percentile(sprintsNeededArr, 95);
+  const dateP50 = mcAddWeeks(p.startDate, Math.ceil(p50sprints) * 2);
+  const dateP85 = mcAddWeeks(p.startDate, Math.ceil(p85sprints) * 2);
+  const dateP95 = mcAddWeeks(p.startDate, Math.ceil(p95sprints) * 2);
+
+  const itemsP50 = percentile(itemsAtTargetArr, 50);
+  const itemsP85 = percentile(itemsAtTargetArr, 15);
+  const itemsP95 = percentile(itemsAtTargetArr, 5);
+
+  document.getElementById('mc2Results').innerHTML = `
+    <div class="mc-stat p50">
+      <div class="lbl">Data ukończenia · P50</div>
+      <div class="val">${mcFormatDate(dateP50)}</div>
+      <div class="sub">typowy scenariusz (~${Math.ceil(p50sprints)} sprintów)</div>
+    </div>
+    <div class="mc-stat p85">
+      <div class="lbl">Data ukończenia · P85</div>
+      <div class="val">${mcFormatDate(dateP85)}</div>
+      <div class="sub">bezpieczna data, 85% pewności</div>
+    </div>
+    <div class="mc-stat p95">
+      <div class="lbl">Data ukończenia · P95</div>
+      <div class="val">${mcFormatDate(dateP95)}</div>
+      <div class="sub">bardzo bezpieczna data, 95% pewności</div>
+    </div>
+    <div class="mc-stat">
+      <div class="lbl">Do ${new Date(p.targetDate+'T00:00:00').toLocaleDateString('pl-PL')}</div>
+      <div class="val">${itemsP85.toFixed(0)} <span style="font-size:11px;color:var(--muted);">/ ${backlogP50.toFixed(0)} hist.</span></div>
+      <div class="sub">co najmniej tyle, 85% pewności (P50: ${itemsP50.toFixed(0)}, P95: ${itemsP95.toFixed(0)})</div>
+    </div>
+  `;
+
+  // ---- Impact breakdown ----
+  const baseline = mc2Simulate(p, { includeCapacity:false, includeBoost:false });
+  const withCapacity = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeBoost:false });
+  const withAll = mc2Simulate(p, { includeCapacity: p.includeCapacity, includeBoost: p.includeBoost });
+
+  const stepsDef = [
+    { label: 'Bez ograniczeń (100% czasu, brak wzrostu)', arr: baseline.sprintsNeededArr },
+    { label: '% czasu zespołu na Epikach' + (p.includeCapacity ? '' : ' — wyłączone'), arr: withCapacity.sprintsNeededArr },
+    { label: 'Wzrost przepustowości od września' + (p.includeBoost ? '' : ' — wyłączone'), arr: withAll.sprintsNeededArr },
+  ];
+  let prevDays = 0;
+  const impactRows = stepsDef.map((step, i) => {
+    const sp = percentile(step.arr, 85);
+    const date = mcAddWeeks(p.startDate, Math.ceil(sp) * 2);
+    const daysFromStart = Math.round((date - new Date(p.startDate+'T00:00:00')) / 86400000);
+    const delta = i === 0 ? 0 : daysFromStart - prevDays;
+    prevDays = daysFromStart;
+    const deltaStr = i === 0 ? '—' : (delta >= 0 ? '+' : '') + delta + ' dni';
+    const deltaColor = i === 0 ? 'var(--muted-2)' : (delta > 0 ? 'var(--m)' : delta < 0 ? 'var(--s)' : 'var(--muted-2)');
+    return `<div class="mc-impact-row">
+      <span class="iname">${step.label}</span>
+      <span class="idelta" style="color:${deltaColor}">${deltaStr}</span>
+      <span class="idate">${mcFormatDate(date)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mc2Impact').innerHTML = `
+    <div class="ititle">Wpływ czynników na datę P85 (krok po kroku, każdy dodany do poprzedniego)</div>
+    ${impactRows}
+  `;
+
+  // ---- Histogram ----
+  const counts = {};
+  sprintsNeededArr.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
+  const sprintKeys = Object.keys(counts).map(Number).sort((a,b)=>a-b);
+  const histData = sprintKeys.map(s => ({
+    x: mcAddWeeks(p.startDate, s * 2).getTime(),
+    y: (counts[s] / MC_TRIALS) * 100,
+  }));
+
+  const histDataset = {
+    label: 'Trafienia (% prób)',
+    data: histData,
+    backgroundColor: '#9b8cf299',
+    borderColor: '#9b8cf2',
+    borderWidth: 1,
+  };
+
+  const mc2MarkerPlugin = {
+    id: 'mc2Markers',
+    afterDraw(c){
+      const xScale = c.scales.x, yScale = c.scales.y;
+      const ctx = c.ctx;
+      const markers = [
+        [dateP50.getTime(), '#9aa4b5', 'P50'],
+        [dateP85.getTime(), '#f2a65a', 'P85'],
+        [dateP95.getTime(), '#e4607a', 'P95'],
+      ];
+      ctx.save();
+      markers.forEach(([ts, color, label]) => {
+        const xPix = xScale.getPixelForValue(ts);
+        if (xPix < xScale.left || xPix > xScale.right) return;
+        ctx.beginPath();
+        ctx.setLineDash([5,4]);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.6;
+        ctx.moveTo(xPix, yScale.top);
+        ctx.lineTo(xPix, yScale.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = color;
+        ctx.font = '600 10.5px IBM Plex Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, xPix, yScale.top - 4);
+      });
+      ctx.restore();
+    }
+  };
+
+  if (!mc2Chart){
+    mc2Chart = new Chart(document.getElementById('mc2Chart').getContext('2d'), {
+      type: 'bar',
+      data: { datasets: [histDataset] },
+      plugins: [mc2MarkerPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'week', tooltipFormat: 'dd.MM.yyyy', displayFormats: { week: 'dd.MM' } },
+            title: { display: true, text: 'Data ukończenia wszystkich Epików', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:11} },
+            grid: { color: '#222837' },
+            ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: '% symulacji', color: '#838ea0', font:{family:"'IBM Plex Mono'", size:11} },
+            grid: { color: '#222837' },
+            ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            callbacks: {
+              title(items){ return new Date(items[0].parsed.x).toLocaleDateString('pl-PL'); },
+              label(item){ return 'Prawdopodobieństwo ukończenia w tym tygodniu: ' + item.parsed.y.toFixed(1) + '%'; }
+            }
+          }
+        }
+      }
+    });
+  } else {
+    mc2Chart.data.datasets = [histDataset];
+    mc2Chart.update();
+  }
+}
+
+let mc2Debounce = null;
+function mc2ScheduleRender(){
+  clearTimeout(mc2Debounce);
+  mc2Debounce = setTimeout(renderMonteCarlo2, 120);
+}
+
+['mc2StartDate','mc2TargetDate','mc2Throughput'].forEach(id => {
+  document.getElementById(id).addEventListener('input', mc2ScheduleRender);
+});
+['mc2CapacityPct','mc2BoostPct'].forEach(id => {
+  document.getElementById(id).addEventListener('input', mc2ScheduleRender);
+});
+['mc2CapacityToggle','mc2BoostToggle'].forEach(id => {
+  document.getElementById(id).addEventListener('change', mc2ScheduleRender);
+});
+
+renderEpicsTable();
+
 // ---------- Toast notifications ----------
 const toastEl = document.getElementById('toast');
 const toastMsg = document.getElementById('toastMsg');
@@ -2537,7 +2941,7 @@ applyFilter();
 // XmR charts (tabs 04/05) are intentionally NOT rendered here: their canvases live inside
 // a display:none pane at page load, and Chart.js permanently breaks if a chart is created
 // on a 0×0 canvas. Lazy-init happens on first visit to each tab (see tab nav below).
-let xmr1Loaded = false, xmr2Loaded = false, mcLoaded = false;
+let xmr1Loaded = false, xmr2Loaded = false, mcLoaded = false, mc2Loaded = false;
 
 // XmR X-chart hover cursor
 const xChartCanvas = document.getElementById('xChart');
@@ -2568,11 +2972,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (target === 'xmr1' && !xmr1Loaded){ xmr1Loaded = true; renderXmR(); }
     if (target === 'xmr2' && !xmr2Loaded){ xmr2Loaded = true; renderXmR2(); }
     if (target === 'mc' && !mcLoaded){ mcLoaded = true; renderMonteCarlo(); }
+    if (target === 'mc2' && !mc2Loaded){ mc2Loaded = true; renderMonteCarlo2(); }
 
     // For charts that already exist, force a resize once the pane is actually visible
     // (covers layout-width changes between tabs).
     requestAnimationFrame(() => {
-      [chart, xChart, mrChart, xChart2, mrChart2, mcChart].forEach(c => { if (c) c.resize(); });
+      [chart, xChart, mrChart, xChart2, mrChart2, mcChart, mc2Chart].forEach(c => { if (c) c.resize(); });
     });
   });
 });
