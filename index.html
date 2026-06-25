@@ -235,6 +235,18 @@
   .rule-card .rc-name{display:block;font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px;}
   .rule-card .rc-desc{display:block;font-size:10px;color:var(--muted-2);line-height:1.4;}
 
+  .tabnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;border-bottom:1px solid var(--border);padding-bottom:0;}
+  .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;transition:all .15s ease;white-space:nowrap;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--text);border-bottom-color:var(--m);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+  .tab-desc{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--border);border-left:3px solid var(--m);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.6;}
+  .tab-desc b{color:var(--text);font-weight:500;}
+  .tab-desc .tdtitle{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin-bottom:8px;font-weight:500;}
+
   footer{margin-top:22px;color:var(--muted-2);font-size:11px;line-height:1.7;}
   footer b{color:var(--muted);}
 
@@ -258,26 +270,18 @@
     </div>
   </header>
 
-  <div class="guide">
-    <h4>Jak czytać dashboard</h4>
-    <div class="guide-items">
-      <div class="guide-item">
-        <div class="gtitle"><span class="gnum">01</span>Scatterplot tasków</div>
-        <div class="gtext">Każda kropka = jeden task. <b>Oś X</b> — data ukończenia, <b>oś Y</b> — czas obsługi w dniach. <b>Kolor</b> — rozmiar (S/M/L). Trzy poziome linie przerywane to percentyle <b>P50</b> (mediana), <b>P75</b> i <b>P95</b> — bursztynowa P95 to „najgorszy realistyczny" czas obsługi. <b>Kliknij kropkę</b>, żeby wyłączyć task z analizy (zostanie na wykresie wyszarzony); kliknij szarą kropkę, żeby włączyć ją z powrotem.</div>
-      </div>
-      <div class="guide-item">
-        <div class="gtitle"><span class="gnum">02</span>Rozkład per rozmiar</div>
-        <div class="gtext">Dla każdego rozmiaru: cienka linia od <b>min do max</b>, pudełko od <b>P25 do P75</b> (środkowe 50% tasków), gruba kreska to <b>mediana</b>. Półprzezroczyste kropki to pojedyncze taski. Po prawej <b>CV</b> = im niżej, tym przewidywalniejsza kategoria.</div>
-      </div>
-      <div class="guide-item">
-        <div class="gtitle"><span class="gnum">03</span>Filtry i edycja</div>
-        <div class="gtext">Zmień zakres dat <b>polami</b>, <b>suwakiem</b> lub <b>presetami</b>. W tabeli <b>odznacz wiersz</b>, żeby wyłączyć task z analizy — wszystkie wykresy i statystyki przeliczą się od razu. Możesz też <b>dodać własne taski</b> formularzem.</div>
-      </div>
-      <div class="guide-item">
-        <div class="gtitle"><span class="gnum">04</span>XmR — stabilność</div>
-        <div class="gtext">Wykres <b>indywidualnych obserwacji</b> z liniami naturalnych granic procesu (UNPL/LNPL) i osobnym wykresem <b>zakresu ruchomego</b>. Czerwone kropki = sygnały specjalnych przyczyn. Gdy zero sygnałów → proces jest <b>stabilny i przewidywalny</b>.</div>
-      </div>
-    </div>
+  <div class="tabnav" id="tabnav">
+    <button class="tab-btn active" data-tab="scatter">01 · Scatterplot</button>
+    <button class="tab-btn" data-tab="dist">02 · Rozkład i outliery</button>
+    <button class="tab-btn" data-tab="data">03 · Edycja danych</button>
+    <button class="tab-btn" data-tab="xmr1">04 · XmR — Cycle Time</button>
+    <button class="tab-btn" data-tab="xmr2">05 · XmR — Throughput (tydzień)</button>
+  </div>
+
+  <div class="tab-pane active" data-tab="scatter">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak czytać ten wykres</div>
+    Każda kropka = jeden task. <b>Oś X</b> — data ukończenia, <b>oś Y</b> — czas obsługi w dniach. <b>Kolor</b> — rozmiar (S/M/L). Trzy poziome linie przerywane to percentyle <b>P50</b> (mediana), <b>P75</b> i <b>P95</b> — bursztynowa P95 to „najgorszy realistyczny" czas obsługi. <b>Kliknij kropkę</b>, żeby wyłączyć task z analizy (zostanie na wykresie wyszarzony); kliknij szarą kropkę, żeby włączyć ją z powrotem.
   </div>
 
   <div class="filterbar">
@@ -369,6 +373,13 @@
       <canvas id="bubbleChart"></canvas>
     </div>
   </div>
+  <!-- /tab: scatter -->
+
+  <div class="tab-pane" data-tab="dist">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak czytać te wykresy</div>
+    Dla każdego rozmiaru: cienka linia od <b>min do max</b>, pudełko od <b>P25 do P75</b> (środkowe 50% tasków), gruba kreska to <b>mediana</b>. Półprzezroczyste kropki to pojedyncze taski. Po prawej <b>CV</b> = im niżej, tym przewidywalniejsza kategoria. Po prawej stronie — lista konkretnych tasków przekraczających P95.
+  </div>
 
   <div class="section-divider">
     <span class="num">02</span>
@@ -387,6 +398,15 @@
       <div class="sublead">Taski przekraczające P95 dla aktualnego okresu</div>
       <div id="outList"></div>
     </div>
+  </div>
+
+  </div>
+  <!-- /tab: dist -->
+
+  <div class="tab-pane" data-tab="data">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak korzystać z edycji danych</div>
+    Zmień zakres dat <b>polami</b>, <b>suwakiem</b> lub <b>presetami</b> (w zakładce Scatterplot). W tabeli poniżej <b>odznacz wiersz</b>, żeby wyłączyć task z analizy — wszystkie wykresy i statystyki przeliczą się od razu. Możesz też <b>dodać własne taski</b> formularzem.
   </div>
 
   <div class="section-divider">
@@ -450,6 +470,15 @@
         </table>
       </div>
     </div>
+  </div>
+
+  </div>
+  <!-- /tab: data -->
+
+  <div class="tab-pane" data-tab="xmr1">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak czytać wykres XmR (Cycle Time)</div>
+    Osobny zbiór danych (Team_Cycle_Time_for_XMR.xlsx) — 30 tasków z datą startu, zamknięcia i cycle time. <b>Wykres X</b> (góra) pokazuje pojedyncze obserwacje z liniami UNPL/LNPL i strefami tercji. <b>Wykres mR</b> (dół) — zakres ruchomy między kolejnymi taskami. Reguły 1–4 (karty-przyciski) liczone są <b>tylko w kierunku pogorszenia</b> (powyżej wytycznych) — to decyzja analityczna podjęta dla tego zbioru.
   </div>
 
   <div class="section-divider">
@@ -563,6 +592,119 @@
       </div>
     </div>
   </div>
+
+  </div>
+  <!-- /tab: xmr1 -->
+
+  <div class="tab-pane" data-tab="xmr2">
+  <div class="tab-desc">
+    <div class="tdtitle">Jak czytać wykres XmR (Throughput, tygodniowo)</div>
+    Dane wejściowe (Throughput_Daily.xlsx) to <b>dzienna</b> liczba ukończonych zadań — tu <b>zagregowane tygodniowo</b> (suma Pon–Nd) na potrzeby tej analizy. W przeciwieństwie do zakładki Cycle Time, linia środkowa to <b>mediana</b> (nie średnia) — bardziej odporna na nietypowo dobre/słabe tygodnie. Sygnały liczone są <b>w obie strony</b> (spadek i wzrost throughput), bo oba kierunki są tu istotne biznesowo.
+  </div>
+
+  <div class="section-divider">
+    <span class="num">05</span>
+    <span class="stitle">Stabilność procesu — Throughput tygodniowy (XmR na medianie)</span>
+    <span class="rule"></span>
+    <span class="ssub">Osobny zbiór danych (Throughput_Daily.xlsx), zagregowany z dnia na tydzień (suma). Centralna linia i granice liczone na medianie, nie średniej — odporniejsze na skośność danych liczbowych (throughput to dane zliczeniowe, często z dużą liczbą zer).</span>
+  </div>
+
+  <div class="xmr-panel">
+    <div class="xmr-head">
+      <div class="xmr-title">Wykres indywidualnych obserwacji (X) i zakresu ruchomego (mR) — tygodnie
+        <small>Wariant median-based: <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">CL = mediana</code> · <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">mR̄ = mediana |Δ|</code> · <code style="font-family:'IBM Plex Mono';background:var(--panel-2);padding:1px 5px;border-radius:3px;color:var(--m);">UNPL/LNPL = mediana ± 2,66·mR̄</code>.</small>
+      </div>
+      <div class="xmr-summary" id="xmrSummary2"></div>
+    </div>
+
+    <div class="xmr-rules" id="xmrRules2"></div>
+
+    <div class="xmr-guide">
+      <div class="xmr-card accent-x">
+        <div class="ctitle">Wykres X <span class="ctag">górny</span></div>
+        <div class="ctext">
+          Każda kropka to <b>jeden tydzień</b> (suma dziennego throughput, Pon–Nd), w kolejności chronologicznej.
+          <ul>
+            <li><span class="gray">━ ━</span> linia CL = <b>mediana</b> tygodniowego throughput</li>
+            <li><span class="red">┄ ┄</span> linie UNPL/LNPL = <b>mediana ± 2,66 · mediana(mR)</b></li>
+            <li>kropkowane linie dzielą odległość CL→NPL na tercje (1/3, 2/3)</li>
+            <li><b>Kliknij kropkę</b>, żeby wykluczyć/przywrócić tydzień z analizy</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card accent-mr">
+        <div class="ctitle">Wykres mR <span class="ctag">dolny</span></div>
+        <div class="ctext">
+          Każda kropka = <b>|tydzień[i] − tydzień[i−1]|</b>, czyli skok throughput względem poprzedniego tygodnia.
+          <ul>
+            <li><span class="gray">━ ━</span> linia CL = <b>mediana</b> zakresów ruchomych (nie średnia!)</li>
+            <li><span class="red">┄ ┄</span> UNPL = <b>3,267 · mediana(mR)</b></li>
+            <li>🔴 czerwona kropka = nadzwyczajny skok throughput tydzień-do-tygodnia</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card" style="border-top:2px solid var(--m);">
+        <div class="ctitle">4 reguły sygnałów <span class="ctag">obie strony</span></div>
+        <div class="ctext">
+          W tej zakładce sygnały liczone są <b>w obie strony</b> — spadek throughput (problem z dostawą) i wzrost (możliwa zmiana procesu) są tu jednakowo istotne.
+          <ul>
+            <li><b style="color:#ff6b8a">●</b> R1 — tydzień poza UNPL/LNPL</li>
+            <li><b style="color:#f2a65a">●</b> R2 — 2 z 3 kolejnych tygodni poza 2/3 NPL (ta sama strona)</li>
+            <li><b style="color:#e8d44d">●</b> R3 — 3 z 5 kolejnych tygodni poza 1/3 NPL (ta sama strona)</li>
+            <li><b style="color:#7c9fe0">●</b> R4 — 8 tygodni z rzędu po jednej stronie mediany</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="xmr-card accent-signal">
+        <div class="ctitle">Pierwszy / ostatni tydzień</div>
+        <div class="ctext">
+          Pierwszy (06.01) i ostatni (14.04) tydzień w zbiorze mają tylko <b>6 z 7 dni</b> danych — są niepełne. Oznaczone w tabeli jako <b>częściowe</b>; ich throughput jest naturalnie niżej obciążony. Możesz je wykluczyć checkboxem, jeśli zniekształcają analizę.
+        </div>
+      </div>
+
+      <div class="xmr-card accent-stable">
+        <div class="ctitle">Brak sygnału?</div>
+        <div class="ctext">
+          Throughput tygodniowy jest <b>stabilny</b> — zespół dostarcza przewidywalną liczbę zadań tydzień do tygodnia. To dobra podstawa do prognozowania (np. ile zadań zrobicie w kolejnych 4 tygodniach).
+        </div>
+      </div>
+    </div>
+
+    <div class="xmr-chart">
+      <canvas id="xChart2"></canvas>
+    </div>
+    <div class="xmr-chart mr">
+      <canvas id="mrChart2"></canvas>
+    </div>
+    <div class="xmr-verdict" id="xmrVerdict2"></div>
+
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+      <div class="table-toolbar">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);">Tabela throughput tygodniowy</span>
+        <span style="font-size:11px;color:var(--muted-2);">— odznacz wiersz, aby wykluczyć tydzień z wykresów XmR</span>
+        <span class="count" id="weeklyTableCount"></span>
+      </div>
+      <div class="table-scroll" style="max-height:280px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:32px;"></th>
+              <th>Tydzień (od)</th>
+              <th class="num">Throughput</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="weeklyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  <!-- /tab: xmr2 -->
 
   <footer>
     <b>Źródło:</b> Lead_Times_202425.xlsx · <b>n</b> = 36 tasków · Kolor kółka oznacza deklarowany rozmiar taska (S / M / L).
@@ -1130,25 +1272,65 @@ const cycleExcluded = new Set();
 function cycleActive(){
   return cycleRecords.filter(r => !cycleExcluded.has(r.uid));
 }
+
+// Weekly Throughput dataset — dedicated source for the second XmR tab (Throughput_Daily.xlsx, aggregated)
+// Daily counts summed Mon–Sun. First and last week are partial (6/7 days of data available).
+const weeklyRecords = [
+  {weekStart:'2025-01-06', throughput:15, partial:true},
+  {weekStart:'2025-01-13', throughput:12, partial:false},
+  {weekStart:'2025-01-20', throughput:7,  partial:false},
+  {weekStart:'2025-01-27', throughput:11, partial:false},
+  {weekStart:'2025-02-03', throughput:23, partial:false},
+  {weekStart:'2025-02-10', throughput:15, partial:false},
+  {weekStart:'2025-02-17', throughput:15, partial:false},
+  {weekStart:'2025-02-24', throughput:19, partial:false},
+  {weekStart:'2025-03-03', throughput:10, partial:false},
+  {weekStart:'2025-03-10', throughput:17, partial:false},
+  {weekStart:'2025-03-17', throughput:17, partial:false},
+  {weekStart:'2025-03-24', throughput:7,  partial:false},
+  {weekStart:'2025-03-31', throughput:15, partial:false},
+  {weekStart:'2025-04-07', throughput:8,  partial:false},
+  {weekStart:'2025-04-14', throughput:12, partial:true},
+];
+weeklyRecords.forEach((r,i) => { r.uid = 'w' + i; });
+const weeklyExcluded = new Set();
+
+function weeklyActive(){
+  return weeklyRecords.filter(r => !weeklyExcluded.has(r.uid));
+}
 // Constants from SPC tables for n=2: 3/d2 where d2(2)=1.128 → 2.66; D4(2)=3.267
 const XMR_E2 = 2.66;
 const XMR_D4 = 3.267;
 
-function computeXmR(source, dateField, valueField){
+function computeXmR(source, dateField, valueField, opts){
+  const centerMode = (opts && opts.centerMode) || 'mean'; // 'mean' | 'median'
+  const direction  = (opts && opts.direction)  || 'both';  // 'both' | 'above'
+
   const sorted = [...source].sort((a,b) => new Date(a[dateField]) - new Date(b[dateField]));
   const vals = sorted.map(r => r[valueField]);
   const mr = [];
   for (let i = 1; i < vals.length; i++) mr.push(Math.abs(vals[i] - vals[i-1]));
-  const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
-  const mrBar = mr.length ? mr.reduce((a,b)=>a+b,0)/mr.length : 0;
+
+  const center = centerMode === 'median'
+    ? median(vals)
+    : (vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0);
+  const mrCenter = centerMode === 'median'
+    ? median(mr)
+    : (mr.length ? mr.reduce((a,b)=>a+b,0)/mr.length : 0);
+
+  const mean = center;    // kept as "mean" key for backward compatibility in callers/UI
+  const mrBar = mrCenter; // kept as "mrBar" key for backward compatibility
   const sigma = mrBar / 1.128;
   const UCL = mean + XMR_E2 * mrBar;
-  const LCL = Math.max(0, mean - XMR_E2 * mrBar);  // clamp at 0 (negative time impossible)
+  const LCL = Math.max(0, mean - XMR_E2 * mrBar);  // clamp at 0 (negative values impossible)
   const UCL_mr = XMR_D4 * mrBar;
-  const xSignals = sorted.map((r,i) => vals[i] > UCL); // analysis decision: only flag degradation (above), not improvement (below)
+
+  const xSignals = direction === 'above'
+    ? sorted.map((r,i) => vals[i] > UCL)
+    : sorted.map((r,i) => vals[i] > UCL || vals[i] < LCL);
   const mrSignals = mr.map(v => v > UCL_mr);
 
-  // ---- Zone thresholds (between mean and each natural process limit, split into thirds) ----
+  // ---- Zone thresholds (between center and each natural process limit, split into thirds) ----
   const upSpan = UCL - mean;
   const downSpan = mean - LCL;
   const oneThirdUp   = mean + upSpan / 3;
@@ -1157,45 +1339,46 @@ function computeXmR(source, dateField, valueField){
   const twoThirdDown = mean - 2 * downSpan / 3;
 
   // ---- Western Electric / Wheeler zone-test rules (computed on the X chart only) ----
-  // Analysis decision: only the "above guideline" direction counts as a signal here
-  // (cycle time getting worse). Crossing below the same thresholds is not flagged.
   const n = vals.length;
-  const rule1 = xSignals.slice(); // beyond UNPL — already computed above
-  const rule2 = new Array(n).fill(false); // 2 of 3 consecutive beyond 2/3 UNPL
-  const rule3 = new Array(n).fill(false); // 3 of 5 consecutive beyond 1/3 UNPL
-  const rule4 = new Array(n).fill(false); // 8 consecutive above the mean
+  const rule1 = xSignals.slice(); // beyond UNPL (or UNPL/LNPL if direction='both') — already computed above
+  const rule2 = new Array(n).fill(false); // 2 of 3 consecutive beyond 2/3 line
+  const rule3 = new Array(n).fill(false); // 3 of 5 consecutive beyond 1/3 line
+  const rule4 = new Array(n).fill(false); // 8 consecutive on one side of center
 
   for (let i = 0; i < n; i++){
     // Rule 2: window of 3 ending at i
     if (i >= 2){
-      let upCount = 0;
+      let upCount = 0, downCount = 0;
       for (let k = i-2; k <= i; k++){
         if (vals[k] > twoThirdUp) upCount++;
+        if (direction === 'both' && vals[k] < twoThirdDown) downCount++;
       }
-      if (upCount >= 2) rule2[i] = true;
+      if (upCount >= 2 || downCount >= 2) rule2[i] = true;
     }
     // Rule 3: window of 5 ending at i
     if (i >= 4){
-      let upCount = 0;
+      let upCount = 0, downCount = 0;
       for (let k = i-4; k <= i; k++){
         if (vals[k] > oneThirdUp) upCount++;
+        if (direction === 'both' && vals[k] < oneThirdDown) downCount++;
       }
-      if (upCount >= 3) rule3[i] = true;
+      if (upCount >= 3 || downCount >= 3) rule3[i] = true;
     }
-    // Rule 4: window of 8 ending at i, all strictly above the mean
+    // Rule 4: window of 8 ending at i, all strictly on one side of the center
     if (i >= 7){
-      let allAbove = true;
+      let allAbove = true, allBelow = true;
       for (let k = i-7; k <= i; k++){
         if (!(vals[k] > mean)) allAbove = false;
+        if (!(vals[k] < mean)) allBelow = false;
       }
-      if (allAbove) rule4[i] = true;
+      if (allAbove || (direction === 'both' && allBelow)) rule4[i] = true;
     }
   }
 
   return {
     sorted, vals, mr, mean, mrBar, sigma, UCL, LCL, UCL_mr, xSignals, mrSignals, dateField, valueField,
     oneThirdUp, twoThirdUp, oneThirdDown, twoThirdDown,
-    rule1, rule2, rule3, rule4,
+    rule1, rule2, rule3, rule4, centerMode, direction,
   };
 }
 
@@ -1229,6 +1412,8 @@ const ZONE_LINE_COLOR = '#aab3c4';
 
 // Toggle state — which rule highlighting is visible on the X chart
 const ruleToggles = { r1: true, r2: true, r3: true, r4: true };
+const ruleToggles2 = { r1: true, r2: true, r3: true, r4: true }; // weekly throughput tab
+const THROUGHPUT_COLOR = '#9b8cf2';
 
 function makeZoneLineDataset(value, source, dateField){
   if (!source.length) return null;
@@ -1253,7 +1438,7 @@ function makeZoneLineDataset(value, source, dateField){
 const zoneLabelPlugin = {
   id: 'zoneLabels',
   afterDraw(chart){
-    if (chart.canvas.id !== 'xChart') return;
+    if (chart.canvas.id !== 'xChart' && chart.canvas.id !== 'xChart2') return;
     const xmr = chart._xmrRef;
     if (!xmr) return;
     const yScale = chart.scales.y;
@@ -1367,6 +1552,115 @@ function buildMRChartData(xmr){
   return datasets;
 }
 
+// ---------- Weekly throughput chart builders (tab 05) ----------
+function buildXChartData2(xmr){
+  const { sorted, vals, UCL, LCL, mean, dateField, rule1, rule2, rule3, rule4 } = xmr;
+
+  const pointStyle = sorted.map((r,i) => {
+    if (ruleToggles2.r1 && rule1[i]) return { color: SIGNAL_RED,  radius: 7,   border: '#fff' };
+    if (ruleToggles2.r2 && rule2[i]) return { color: RULE2_COLOR, radius: 6.3, border: '#fff' };
+    if (ruleToggles2.r3 && rule3[i]) return { color: RULE3_COLOR, radius: 5.8, border: '#1a1e26' };
+    if (ruleToggles2.r4 && rule4[i]) return { color: RULE4_COLOR, radius: 5.8, border: '#fff' };
+    return { color: THROUGHPUT_COLOR, radius: 4.5, border: THROUGHPUT_COLOR };
+  });
+
+  const dataPoints = sorted.map((r,i) => ({
+    x: new Date(r[dateField]).getTime(),
+    y: vals[i],
+    _raw: r,
+    _signal: rule1[i],
+    _rule2: rule2[i], _rule3: rule3[i], _rule4: rule4[i],
+  }));
+
+  const series = {
+    label: 'Throughput tygodniowy',
+    data: dataPoints,
+    type: 'line',
+    borderColor: 'rgba(236,239,243,0.45)',
+    borderWidth: 1.2,
+    pointBackgroundColor: pointStyle.map(s => s.color),
+    pointBorderColor: pointStyle.map(s => s.border),
+    pointBorderWidth: 1.2,
+    pointRadius: pointStyle.map(s => s.radius),
+    pointHoverRadius: 8,
+    fill: false,
+    tension: 0,
+    order: 1,
+  };
+  const datasets = [series];
+  const ucl = makeLimitDataset('UNPL', UCL, SIGNAL_RED, [7,3], sorted, dateField, 2.2);
+  const lcl = makeLimitDataset('LNPL', LCL, SIGNAL_RED, [7,3], sorted, dateField, 2.2);
+  const cl  = makeLimitDataset('Mediana', mean, '#c3cad6', [4,2], sorted, dateField, 1.8);
+  const z1 = makeZoneLineDataset(xmr.twoThirdUp,   sorted, dateField);
+  const z2 = makeZoneLineDataset(xmr.oneThirdUp,   sorted, dateField);
+  const z3 = makeZoneLineDataset(xmr.oneThirdDown, sorted, dateField);
+  const z4 = makeZoneLineDataset(xmr.twoThirdDown, sorted, dateField);
+  [z1,z2,z3,z4].forEach(z => { if (z) datasets.push(z); });
+  if (ucl) datasets.push(ucl);
+  if (lcl) datasets.push(lcl);
+  if (cl)  datasets.push(cl);
+  return datasets;
+}
+
+function buildMRChartData2(xmr){
+  const { sorted, mr, UCL_mr, mrBar, mrSignals, dateField } = xmr;
+  const dataPoints = mr.map((v,i) => ({
+    x: new Date(sorted[i+1][dateField]).getTime(),
+    y: v,
+    _raw: sorted[i+1],
+    _signal: mrSignals[i],
+  }));
+  const ptColors  = mrSignals.map(s => s ? SIGNAL_RED : '#9aa4b5');
+  const ptBorders = mrSignals.map(s => s ? '#fff' : '#9aa4b5');
+  const ptRadii   = mrSignals.map(s => s ? 6 : 3.5);
+
+  const series = {
+    label: 'Zakres ruchomy (tyg.)',
+    data: dataPoints,
+    type: 'line',
+    borderColor: 'rgba(236,239,243,0.35)',
+    borderWidth: 1,
+    pointBackgroundColor: ptColors,
+    pointBorderColor: ptBorders,
+    pointBorderWidth: 1,
+    pointRadius: ptRadii,
+    pointHoverRadius: 7,
+    fill: false,
+    tension: 0,
+    order: 1,
+  };
+  const datasets = [series];
+  const sliceFromSecond = sorted.slice(1);
+  const ucl = makeLimitDataset('UNPL mR', UCL_mr, SIGNAL_RED, [7,3], sliceFromSecond, dateField, 2.2);
+  const cl  = makeLimitDataset('mediana(mR)', mrBar, '#c3cad6', [4,2], sliceFromSecond, dateField, 1.8);
+  if (ucl) datasets.push(ucl);
+  if (cl)  datasets.push(cl);
+  return datasets;
+}
+
+function xmrTooltipCallbacks2(){
+  return {
+    callbacks: {
+      title(items){
+        const raw = items[0].raw;
+        if (!raw._raw) return items[0].dataset.label;
+        const r = raw._raw;
+        const d = new Date(r.weekStart);
+        return 'Tydzień od ' + d.toLocaleDateString('pl-PL') + (r.partial ? ' (częściowy)' : '');
+      },
+      label(item){
+        const raw = item.raw;
+        const lines = [item.dataset.label + ': ' + (typeof raw.y === 'number' ? raw.y.toFixed(0) : raw.y)];
+        if (raw._signal) lines.push('⚠ Reguła 1 — poza UNPL/LNPL');
+        if (raw._rule2) lines.push('⚠ Reguła 2 — 2 z 3 poza 2/3 NPL');
+        if (raw._rule3) lines.push('⚠ Reguła 3 — 3 z 5 poza 1/3 NPL');
+        if (raw._rule4) lines.push('⚠ Reguła 4 — 8 z rzędu po jednej stronie mediany');
+        return lines;
+      }
+    }
+  };
+}
+
 function xmrTooltipCallbacks(){
   return {
     callbacks: {
@@ -1394,11 +1688,11 @@ function xmrTooltipCallbacks(){
   };
 }
 
-function commonXmRScales(){
+function commonXmRScales(unit){
   return {
     x: {
       type: 'time',
-      time: { unit: 'month', tooltipFormat: 'dd.MM.yyyy', displayFormats: { month: 'MM.yyyy' } },
+      time: { unit: unit || 'month', tooltipFormat: 'dd.MM.yyyy', displayFormats: { week: 'dd.MM', month: 'MM.yyyy' } },
       grid: { color: '#222837' },
       ticks: { color: '#5d6678', font:{family:"'IBM Plex Mono'", size:10} },
     },
@@ -1426,7 +1720,7 @@ function renderXmR(){
     return;
   }
 
-  const xmr = computeXmR(source, 'closed', 'cycleTime');
+  const xmr = computeXmR(source, 'closed', 'cycleTime', { centerMode: 'mean', direction: 'above' });
   const r1n = xmr.rule1.filter(Boolean).length;
   const r2n = xmr.rule2.filter(Boolean).length;
   const r3n = xmr.rule3.filter(Boolean).length;
@@ -1576,6 +1870,169 @@ function renderCycleTable(){
   });
 }
 
+// ---------- Weekly throughput XmR (tab 05) ----------
+let xChart2 = null, mrChart2 = null;
+
+function renderXmR2(){
+  const source = weeklyActive();
+  const summaryEl = document.getElementById('xmrSummary2');
+  const verdictEl = document.getElementById('xmrVerdict2');
+  const rulesEl = document.getElementById('xmrRules2');
+
+  if (source.length < 2){
+    summaryEl.innerHTML = '';
+    rulesEl.innerHTML = '';
+    verdictEl.className = 'xmr-verdict';
+    verdictEl.textContent = 'Za mało tygodni w zbiorze, żeby policzyć XmR (potrzeba ≥ 2).';
+    if (xChart2) { xChart2.data.datasets = []; xChart2.update(); }
+    if (mrChart2){ mrChart2.data.datasets = []; mrChart2.update(); }
+    return;
+  }
+
+  const xmr = computeXmR(source, 'weekStart', 'throughput', { centerMode: 'median', direction: 'both' });
+  const r1n = xmr.rule1.filter(Boolean).length;
+  const r2n = xmr.rule2.filter(Boolean).length;
+  const r3n = xmr.rule3.filter(Boolean).length;
+  const r4n = xmr.rule4.filter(Boolean).length;
+  const mrSignalCount = xmr.mrSignals.filter(Boolean).length;
+  const totalSignals = r1n + r2n + r3n + r4n + mrSignalCount;
+
+  summaryEl.innerHTML = `
+    <div class="xmr-stat"><div class="lbl">Mediana (CL)</div><div class="val">${xmr.mean.toFixed(0)}<span style="font-size:10px;color:var(--muted);margin-left:3px;">/ tydz.</span></div></div>
+    <div class="xmr-stat"><div class="lbl">σ procesu</div><div class="val">${xmr.sigma.toFixed(1)}</div></div>
+    <div class="xmr-stat"><div class="lbl">UNPL · LNPL</div><div class="val">${xmr.UCL.toFixed(0)} · ${xmr.LCL.toFixed(0)}</div></div>
+    <div class="xmr-stat"><div class="lbl">Sygnały (łącznie)</div><div class="val ${totalSignals ? 'warn' : 'ok'}">${totalSignals}</div></div>
+  `;
+
+  const ruleDefs = [
+    { key:'r1', color: SIGNAL_RED,  name:'Reguła 1 — poza NPL',  desc:'tydzień poza UNPL/LNPL', count: r1n },
+    { key:'r2', color: RULE2_COLOR, name:'Reguła 2 — 2 z 3',     desc:'2 z 3 kolejnych tygodni poza 2/3 NPL', count: r2n },
+    { key:'r3', color: RULE3_COLOR, name:'Reguła 3 — 3 z 5',     desc:'3 z 5 kolejnych tygodni poza 1/3 NPL', count: r3n },
+    { key:'r4', color: RULE4_COLOR, name:'Reguła 4 — 8 z rzędu', desc:'8 tygodni z rzędu po jednej stronie mediany', count: r4n },
+  ];
+  rulesEl.innerHTML = ruleDefs.map(rd => `
+    <button class="rule-card ${ruleToggles2[rd.key] ? 'active' : ''}" data-rule="${rd.key}" style="--rule-color:${rd.color}">
+      <span class="rc-top">
+        <span class="rc-dot" style="background:${rd.color}"></span>
+        <span class="rc-count">${rd.count}</span>
+      </span>
+      <span class="rc-name">${rd.name}</span>
+      <span class="rc-desc">${rd.desc}</span>
+    </button>
+  `).join('');
+  rulesEl.querySelectorAll('.rule-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.rule;
+      ruleToggles2[key] = !ruleToggles2[key];
+      renderXmR2();
+    });
+  });
+
+  if (totalSignals === 0){
+    verdictEl.className = 'xmr-verdict in-control';
+    verdictEl.innerHTML = `<span class="vlabel">Proces stabilny</span>Żaden tydzień nie przekracza UNPL/LNPL ani nie tworzy podejrzanego wzorca (reguły 1–4, liczone w obie strony). Throughput tygodniowy mieści się w typowej zmienności.`;
+  } else {
+    verdictEl.className = 'xmr-verdict out-of-control';
+    const parts = [];
+    if (r1n) parts.push(`<b>${r1n}</b> tydz${r1n===1?'ień':'nie'} poza UNPL/LNPL (reguła 1)`);
+    if (r2n) parts.push(`<b>${r2n}</b> sygnał${r2n===1?'':'y'} typu 2 z 3 (reguła 2)`);
+    if (r3n) parts.push(`<b>${r3n}</b> sygnał${r3n===1?'':'y'} typu 3 z 5 (reguła 3)`);
+    if (r4n) parts.push(`<b>${r4n}</b> seri${r4n===1?'a':'e'} 8 z rzędu (reguła 4)`);
+    if (mrSignalCount) parts.push(`<b>${mrSignalCount}</b> nadzwyczajn${mrSignalCount===1?'y':'e'} skok${mrSignalCount===1?'':'i'} mR`);
+    verdictEl.innerHTML = `<span class="vlabel">Sygnały specjalnych przyczyn</span>${parts.join(' · ')}. Sprawdź konkretny tydzień w tabeli poniżej — coś nietypowego wpłynęło na throughput (urlopy, święto, duże zadanie, zmiana składu zespołu itp.).`;
+  }
+
+  if (!xChart2){
+    xChart2 = new Chart(document.getElementById('xChart2').getContext('2d'), {
+      type: 'line',
+      data: { datasets: [] },
+      plugins: [zoneLabelPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { right: 56 } },
+        scales: commonXmRScales('week'),
+        onClick: (evt) => handleXChartClick2(evt),
+        plugins: {
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Throughput tygodniowy' && i.text !== '_zone' } },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            ...xmrTooltipCallbacks2(),
+          }
+        }
+      }
+    });
+    mrChart2 = new Chart(document.getElementById('mrChart2').getContext('2d'), {
+      type: 'line',
+      data: { datasets: [] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: commonXmRScales('week'),
+        plugins: {
+          legend: { display: true, labels: { color: '#838ea0', font:{family:"'IBM Plex Mono'", size:10}, boxWidth:14, padding:10, filter: i => i.text !== 'Zakres ruchomy (tyg.)' } },
+          tooltip: {
+            backgroundColor:'#1d2330', borderColor:'#272e3c', borderWidth:1,
+            titleColor:'#eceff3', bodyColor:'#bcc3cf', padding:10,
+            ...xmrTooltipCallbacks2(),
+          }
+        }
+      }
+    });
+  }
+  xChart2._xmrRef = xmr;
+  xChart2.data.datasets = buildXChartData2(xmr);
+  mrChart2.data.datasets = buildMRChartData2(xmr);
+  xChart2.update();
+  mrChart2.update();
+  renderWeeklyTable();
+}
+
+function handleXChartClick2(evt){
+  const points = xChart2.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+  if (!points.length) return;
+  const { datasetIndex, index } = points[0];
+  const dp = xChart2.data.datasets[datasetIndex].data[index];
+  if (!dp || !dp._raw) return;
+  const r = dp._raw;
+  const dateStr = new Date(r.weekStart).toLocaleDateString('pl-PL');
+  if (weeklyExcluded.has(r.uid)){
+    weeklyExcluded.delete(r.uid);
+    showToast(`Włączono tydzień od ${dateStr} · throughput <b>${r.throughput}</b>`, THROUGHPUT_COLOR, () => { weeklyExcluded.add(r.uid); renderXmR2(); });
+  } else {
+    weeklyExcluded.add(r.uid);
+    showToast(`Wyłączono tydzień od ${dateStr} · throughput <b>${r.throughput}</b>`, EXCLUDED_COLOR, () => { weeklyExcluded.delete(r.uid); renderXmR2(); });
+  }
+  renderXmR2();
+}
+
+function renderWeeklyTable(){
+  const tbody = document.getElementById('weeklyTableBody');
+  if (!tbody) return;
+  const sorted = [...weeklyRecords].sort((a,b) => new Date(b.weekStart) - new Date(a.weekStart));
+  tbody.innerHTML = sorted.map(r => {
+    const excluded = weeklyExcluded.has(r.uid);
+    const wd = new Date(r.weekStart).toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+    return `<tr class="${excluded ? 'excluded' : ''}" data-uid="${r.uid}">
+      <td><input type="checkbox" data-uid="${r.uid}" ${excluded ? '' : 'checked'}></td>
+      <td>${wd}</td>
+      <td class="num">${r.throughput}</td>
+      <td>${r.partial ? '<span style="font-size:10px;color:var(--m);font-family:\'IBM Plex Mono\';">częściowy</span>' : ''}</td>
+    </tr>`;
+  }).join('');
+  const active = weeklyRecords.length - weeklyExcluded.size;
+  const cnt = document.getElementById('weeklyTableCount');
+  if (cnt) cnt.textContent = active + ' aktywnych z ' + weeklyRecords.length;
+
+  tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const uid = cb.dataset.uid;
+      if (cb.checked) weeklyExcluded.delete(uid);
+      else weeklyExcluded.add(uid);
+      renderXmR2();
+    });
+  });
+}
+
 // ---------- Toast notifications ----------
 const toastEl = document.getElementById('toast');
 const toastMsg = document.getElementById('toastMsg');
@@ -1653,6 +2110,7 @@ fromInput.value = toISO(dataMin);
 toInput.value = toISO(dataMax);
 applyFilter();
 renderXmR();
+renderXmR2();
 
 // XmR X-chart hover cursor
 const xChartCanvas = document.getElementById('xChart');
@@ -1662,7 +2120,30 @@ xChartCanvas.addEventListener('mousemove', (evt) => {
   xChartCanvas.style.cursor = points.length ? 'pointer' : 'default';
 });
 xChartCanvas.addEventListener('mouseleave', () => { xChartCanvas.style.cursor = 'default'; });
+
+const xChartCanvas2 = document.getElementById('xChart2');
+xChartCanvas2.addEventListener('mousemove', (evt) => {
+  if (!xChart2) return;
+  const points = xChart2.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+  xChartCanvas2.style.cursor = points.length ? 'pointer' : 'default';
+});
+xChartCanvas2.addEventListener('mouseleave', () => { xChartCanvas2.style.cursor = 'default'; });
+
+// ---------- Tab navigation ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.dataset.tab === target));
+    // Charts created while their pane was display:none have a 0×0 canvas —
+    // force a resize once the pane becomes visible so they render correctly.
+    requestAnimationFrame(() => {
+      [chart, xChart, mrChart, xChart2, mrChart2].forEach(c => { if (c) c.resize(); });
+    });
+  });
+});
 </script>
+
 
 </body>
 </html>
